@@ -927,29 +927,69 @@ export default function LeasesFilesPage() {
     <div style={{
       width: '100%',
       height: '100vh',
-      background: '#f8fafc'
+      background: '#f8fafc',
+      padding: '20px',
+      overflow: 'auto'
     }}>
-      {/* Header */}
+      {/* Action Bar */}
       <div style={{
-        background: 'white',
-        borderBottom: '1px solid #e5e7eb',
-        padding: '16px 24px'
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '20px'
       }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '16px',
-          marginBottom: '16px'
+          gap: '12px'
         }}>
-          <div style={{
-            fontSize: '24px',
-            fontWeight: '600',
-            color: '#374151'
-          }}>
-            📄 Leases & Files
-          </div>
+          {activeMainTab === 'leases' && (
+            <button
+              onClick={() => setShowWizard(true)}
+              style={{
+                background: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '8px 16px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              ⊕ Create New Lease
+            </button>
+          )}
+          {activeMainTab === 'templates' && (
+            <button style={{
+              background: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '8px 16px',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              ⊕ Create Template
+            </button>
+          )}
         </div>
+      </div>
         
+      {/* Content */}
+      <div style={{
+        background: 'white',
+        borderRadius: '8px',
+        border: '1px solid #e5e7eb',
+        overflow: 'hidden'
+      }}>
         {/* Tab navigation */}
         <div style={{
           display: 'flex',
@@ -1065,47 +1105,25 @@ export default function LeasesFilesPage() {
             </div>
           </div>
         ) : (
-          <div>
+          <div style={{ padding: '20px' }}>
             <div style={{
               display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '24px'
+              gap: '16px',
+              marginBottom: '20px'
             }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px'
-              }}>
-                <button style={{
-                  background: 'white',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  padding: '8px 12px',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}>
-                  🔽 Filters
-                </button>
-              </div>
-              
               <button style={{
-                background: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '12px 20px',
+                background: 'white',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                padding: '8px 12px',
                 fontSize: '14px',
-                fontWeight: '500',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '4px'
               }}>
-                📄 New Template
+                � Filters
               </button>
             </div>
             

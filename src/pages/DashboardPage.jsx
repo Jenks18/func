@@ -4,43 +4,37 @@ const DashboardPage = ({ onNavigate }) => {
   return (
     <div style={{
       width: '100%',
-      maxWidth: '1400px',
-      margin: '0 auto',
+      maxWidth: '100%',
       padding: '24px',
-      background: '#f8fafc'
+      background: 'transparent',
+      minHeight: '100vh',
+      boxSizing: 'border-box',
+      overflowX: 'hidden'
     }}>
-      {/* Dashboard Header */}
+      {/* Action Buttons */}
       <div style={{
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        marginBottom: '32px'
+        marginBottom: '24px'
       }}>
-        <h1 style={{
-          fontSize: '28px',
-          fontWeight: '700',
-          color: '#1e293b',
-          margin: 0
-        }}>
-          Dashboard
-        </h1>
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '16px'
+          gap: '12px'
         }}>
           <button style={{
             background: '#3b82f6',
             color: 'white',
             border: 'none',
-            borderRadius: '8px',
-            padding: '10px 16px',
+            borderRadius: '6px',
+            padding: '8px 14px',
             fontSize: '14px',
             fontWeight: '500',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '6px'
           }}>
             📄 Record Payment
           </button>
@@ -66,12 +60,13 @@ const DashboardPage = ({ onNavigate }) => {
 
       {/* Collection Section */}
       <div style={{
-        background: 'white',
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)',
         borderRadius: '12px',
         padding: '24px',
         marginBottom: '24px',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        border: '1px solid #e2e8f0'
+        boxShadow: '0 4px 16px 0 rgba(0, 0, 0, 0.08)',
+        border: '1px solid rgba(0, 0, 0, 0.05)'
       }}>
         <div style={{
           display: 'flex',
@@ -82,17 +77,19 @@ const DashboardPage = ({ onNavigate }) => {
           <h2 style={{
             fontSize: '18px',
             fontWeight: '600',
-            color: '#374151',
+            color: '#1e293b',
             margin: 0
           }}>
             Collection - May
           </h2>
           <select style={{
-            border: '1px solid #d1d5db',
+            border: '1px solid #e2e8f0',
             borderRadius: '6px',
             padding: '6px 12px',
             fontSize: '14px',
-            background: 'white'
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            color: '#334155'
           }}>
             <option>May 2023</option>
           </select>
@@ -377,11 +374,12 @@ const DashboardPage = ({ onNavigate }) => {
       }}>
         {/* Unsigned Leases */}
         <div style={{
-          background: 'white',
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
           borderRadius: '12px',
           padding: '24px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-          border: '1px solid #e2e8f0'
+          boxShadow: '0 4px 16px 0 rgba(0, 0, 0, 0.08)',
+          border: '1px solid rgba(0, 0, 0, 0.05)'
         }}>
           <div style={{
             display: 'flex',
@@ -419,11 +417,12 @@ const DashboardPage = ({ onNavigate }) => {
 
         {/* Applications Processing */}
         <div style={{
-          background: 'white',
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
           borderRadius: '12px',
           padding: '24px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-          border: '1px solid #e2e8f0'
+          boxShadow: '0 4px 16px 0 rgba(0, 0, 0, 0.08)',
+          border: '1px solid rgba(0, 0, 0, 0.05)'
         }}>
           <div style={{
             display: 'flex',
@@ -461,11 +460,12 @@ const DashboardPage = ({ onNavigate }) => {
 
         {/* Open Maintenance Requests */}
         <div style={{
-          background: 'white',
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
           borderRadius: '12px',
           padding: '24px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-          border: '1px solid #e2e8f0'
+          boxShadow: '0 4px 16px 0 rgba(0, 0, 0, 0.08)',
+          border: '1px solid rgba(0, 0, 0, 0.05)'
         }}>
           <div style={{
             fontSize: '18px',
