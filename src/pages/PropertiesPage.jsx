@@ -2,10 +2,15 @@
 import React, { useState, useEffect } from 'react';
 import NewPropertyPage from './NewPropertyPage';
 import PropertiesTable from '../components/properties/PropertiesTable';
-import SidebarStats from '../components/SidebarStats';
+import SidebarStats from '../components/SidebarStats'; // Only used in main list view
+
+
+import UnitDetail from '../components/properties/UnitDetail';
 
 export default function PropertiesPage() {
   const [propertiesData, setPropertiesData] = useState([]);
+  const [expandedPropertyId, setExpandedPropertyId] = useState(null);
+  const [selectedUnit, setSelectedUnit] = useState(null); // { property, unit }
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showNewProperty, setShowNewProperty] = useState(false);
@@ -31,7 +36,11 @@ export default function PropertiesPage() {
           leaseExpiration: "1",
           occupied: 100,
           openMaintenance: 1,
-          status: "occupied"
+          status: "occupied",
+          unitsList: [
+            { unit: '200', rent: 1200, overdue: 0, lease: 'Month to Month', status: 'Occupied', maintenance: 1 },
+            { unit: '100', rent: 1200, overdue: 1220, lease: 'Not Expiring', status: 'Occupied', maintenance: 1 },
+          ]
         },
         {
           id: 2,
@@ -43,7 +52,13 @@ export default function PropertiesPage() {
           leaseExpiration: "2",
           occupied: 50,
           openMaintenance: 0,
-          status: "occupied"
+          status: "occupied",
+          unitsList: [
+            { unit: 'A', rent: 700, overdue: 0, lease: 'Expiring', status: 'Occupied', maintenance: 0 },
+            { unit: 'B', rent: 700, overdue: 0, lease: 'Month to Month', status: 'Vacant', maintenance: 1 },
+            { unit: 'C', rent: 650, overdue: 0, lease: 'Not Expiring', status: 'Occupied', maintenance: 0 },
+            { unit: 'D', rent: 650, overdue: 0, lease: 'Expiring', status: 'Occupied', maintenance: 0 },
+          ]
         },
         {
           id: 3,
@@ -55,7 +70,10 @@ export default function PropertiesPage() {
           leaseExpiration: "Expiring",
           occupied: 100,
           openMaintenance: 1,
-          status: "expiring"
+          status: "expiring",
+          unitsList: [
+            { unit: '1', rent: 2500, overdue: 0, lease: 'Expiring', status: 'Occupied', maintenance: 0 },
+          ]
         },
         {
           id: 4,
@@ -67,10 +85,12 @@ export default function PropertiesPage() {
           leaseExpiration: "-",
           occupied: 0,
           openMaintenance: 0,
-          status: "vacant"
+          status: "vacant",
+          unitsList: [
+            { unit: '1', rent: 0, overdue: 0, lease: 'Expiring', status: 'Vacant', maintenance: 0 },
+          ]
         }
       ];
-      
       setPropertiesData(mockProperties);
       setError(null);
     } catch (err) {
@@ -124,6 +144,23 @@ export default function PropertiesPage() {
         minHeight: '100vh'
       }}>
         <h2>Loading Properties...</h2>
+      </div>
+    );
+  }
+
+  if (selectedUnit) {
+    // Drill-down view: use full width, no sidebar
+    return (
+      <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', padding: '20px', display: 'flex' }}>
+        <div style={{ flex: 1 }}>
+          <UnitDetail
+            property={selectedUnit.property}
+            unit={selectedUnit.unit}
+            onBack={() => setSelectedUnit(null)}
+            allProperties={propertiesData}
+            onUnitSelect={(property, unit) => setSelectedUnit({ property, unit })}
+          />
+        </div>
       </div>
     );
   }
@@ -196,10 +233,15 @@ export default function PropertiesPage() {
         </div>
         {/* Properties Table (modular) */}
         <PropertiesTable
-          propertiesData={propertiesData}
+          propertiesData={propertiesData.map(p => ({
+            ...p,
+            showUnits: expandedPropertyId === p.id,
+            onToggleUnits: (id) => setExpandedPropertyId(expandedPropertyId === id ? null : id)
+          }))}
           handleSort={handleSort}
           sortColumn={sortColumn}
           sortOrder={sortOrder}
+          onUnitClick={(property, unit) => setSelectedUnit({ property, unit })}
         />
       </div>
       {/* Right Sidebar (modular) */}

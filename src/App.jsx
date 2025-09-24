@@ -23,14 +23,13 @@ export default function App() {
     { name: 'Dashboard', component: 'Dashboard', icon: '🏠' },
     { name: 'Properties', component: 'Properties', icon: '🏢' },
     { name: 'Tenants', component: 'Tenants', icon: '👥' },
+    { name: 'Applications', component: 'Applications', icon: '📝' },
     { name: 'Leases & Files', component: 'LeasesFiles', icon: '📄' },
     { name: 'Income', component: 'Income', icon: '💰' },
     { name: 'Expenses', component: 'Expenses', icon: '💳' },
     { name: 'Maintenance', component: 'Maintenance', icon: '🔧' },
     { name: 'Messaging', component: 'Messaging', icon: '💬' },
-    { name: 'Listings', component: 'Listings', icon: '📋' },
-    { name: 'DB Test', component: 'DatabaseTest', icon: '🛠️' },
-    { name: 'Settings', component: 'Settings', icon: '⚙️' }
+    { name: 'Listings', component: 'Listings', icon: '📋' }
   ];
 
   // Initialize database
@@ -311,6 +310,73 @@ export default function App() {
                 )}
               </button>
             ))}
+            {/* Settings, unknown icon, and logout at the bottom */}
+            <div style={{ marginTop: 'auto', padding: (sidebarExpanded || sidebarHovered) ? '0 16px 24px 16px' : '0 0 24px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <button
+                onClick={() => setCurrentPage('Settings')}
+                style={{
+                  width: '100%',
+                  height: '48px',
+                  background: currentPage === 'Settings' ? '#3b82f6' : 'transparent',
+                  color: currentPage === 'Settings' ? 'white' : '#cbd5e1',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: (sidebarExpanded || sidebarHovered) ? 'flex-start' : 'center',
+                  gap: (sidebarExpanded || sidebarHovered) ? '16px' : '0',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
+                }}
+              >
+                <span style={{ fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⚙️</span>
+                {(sidebarExpanded || sidebarHovered) && <span style={{ whiteSpace: 'nowrap' }}>Settings</span>}
+              </button>
+              <button
+                style={{
+                  width: '100%',
+                  height: '48px',
+                  background: 'transparent',
+                  color: '#cbd5e1',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: (sidebarExpanded || sidebarHovered) ? 'flex-start' : 'center',
+                  gap: (sidebarExpanded || sidebarHovered) ? '16px' : '0',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
+                }}
+              >
+                <span style={{ fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>❓</span>
+                {(sidebarExpanded || sidebarHovered) && <span style={{ whiteSpace: 'nowrap' }}>Unknown</span>}
+              </button>
+              <button
+                style={{
+                  width: '100%',
+                  height: '48px',
+                  background: 'transparent',
+                  color: '#cbd5e1',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: (sidebarExpanded || sidebarHovered) ? 'flex-start' : 'center',
+                  gap: (sidebarExpanded || sidebarHovered) ? '16px' : '0',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
+                }}
+              >
+                <span style={{ fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🚪</span>
+                {(sidebarExpanded || sidebarHovered) && <span style={{ whiteSpace: 'nowrap' }}>Logout</span>}
+              </button>
+            </div>
           </nav>
         </div>
 

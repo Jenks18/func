@@ -1,502 +1,290 @@
-import React from 'react';
+
+
+import { useEffect, useState } from 'react';
+import propertyService from '../services/propertyService';
+import tenantService from '../services/tenantService';
+import leaseService from '../services/leaseService';
 
 const DashboardPage = ({ onNavigate }) => {
-  return (
-    <div style={{
-      width: '100%',
-      maxWidth: '100%',
-      padding: '24px',
-      background: 'transparent',
-      minHeight: '100vh',
-      boxSizing: 'border-box',
-      overflowX: 'hidden'
-    }}>
-      {/* Action Buttons */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        marginBottom: '24px'
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px'
-        }}>
-          <button style={{
-            background: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '8px 14px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}>
-            📄 Record Payment
-          </button>
-          <button
-            onClick={() => onNavigate && onNavigate('leases')}
-            style={{
-            background: '#10b981',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            padding: '10px 16px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            👤 Add Tenant
-          </button>
-        </div>
-      </div>
+  // Only render the main dashboard grid layout (Collection Stats, Occupancy, Maintenance, Unsigned Leases, Applications Processing)
+			const [properties, setProperties] = useState([]);
+			const [tenants, setTenants] = useState([]);
+			const [leases, setLeases] = useState([]);
+			const [loading, setLoading] = useState(true);
 
-      {/* Collection Section */}
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)',
-        borderRadius: '12px',
-        padding: '24px',
-        marginBottom: '24px',
-        boxShadow: '0 4px 16px 0 rgba(0, 0, 0, 0.08)',
-        border: '1px solid rgba(0, 0, 0, 0.05)'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px'
-        }}>
-          <h2 style={{
-            fontSize: '18px',
-            fontWeight: '600',
-            color: '#1e293b',
-            margin: 0
-          }}>
-            Collection - May
-          </h2>
-          <select style={{
-            border: '1px solid #e2e8f0',
-            borderRadius: '6px',
-            padding: '6px 12px',
-            fontSize: '14px',
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            color: '#334155'
-          }}>
-            <option>May 2023</option>
-          </select>
-        </div>
+			useEffect(() => {
+				async function fetchData() {
+					setLoading(true);
+					const [props, tens, leas] = await Promise.all([
+						propertyService.getAllProperties(),
+						tenantService.getAllTenants(),
+						leaseService.getAllLeases(),
+					]);
+					setProperties(props || []);
+					setTenants(tens || []);
+					setLeases(leas || []);
+					setLoading(false);
+				}
+				fetchData();
+			}, []);
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 300px 1fr',
-          gap: '32px',
-          alignItems: 'center'
-        }}>
-          {/* Outstanding */}
-          <div>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '8px'
-            }}>
-              Outstanding
-            </div>
-            <div style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#ef4444',
-              marginBottom: '4px'
-            }}>
-              $1,050.00
-            </div>
-            <div style={{
-              fontSize: '12px',
-              color: '#ef4444',
-              fontWeight: '500'
-            }}>
-              24% UNPAID
-            </div>
-          </div>
+			// Example calculations (replace with real logic as needed)
+			const totalCollected = leases.reduce((sum, l) => sum + (l.collectedAmount || 0), 0);
+			const totalOverdue = leases.reduce((sum, l) => sum + (l.overdueAmount || 0), 0);
+			const totalProcessing = leases.reduce((sum, l) => sum + (l.processingAmount || 0), 0);
+			const totalComingDue = leases.reduce((sum, l) => sum + (l.comingDueAmount || 0), 0);
+			const totalAmount = totalCollected + totalOverdue + totalProcessing + totalComingDue;
+			const percentCollected = totalAmount ? (totalCollected / totalAmount) * 100 : 0;
+			const percentOverdue = totalAmount ? (totalOverdue / totalAmount) * 100 : 0;
+			const percentProcessing = totalAmount ? (totalProcessing / totalAmount) * 100 : 0;
+			const percentComingDue = totalAmount ? (totalComingDue / totalAmount) * 100 : 0;
 
-          {/* Circular Progress Chart */}
-          <div style={{
-            position: 'relative',
-            width: '200px',
-            height: '200px',
-            margin: '0 auto'
-          }}>
-            <svg width="200" height="200" style={{ transform: 'rotate(-90deg)' }}>
-              {/* Background circle */}
-              <circle
-                cx="100"
-                cy="100"
-                r="80"
-                fill="none"
-                stroke="#f3f4f6"
-                strokeWidth="16"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="100"
-                cy="100"
-                r="80"
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="16"
-                strokeDasharray="502.65"
-                strokeDashoffset="125.66"
-                strokeLinecap="round"
-              />
-            </svg>
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              textAlign: 'center'
-            }}>
-              <div style={{
-                fontSize: '14px',
-                color: '#6b7280',
-                marginBottom: '4px'
-              }}>
-                May
-              </div>
-              <div style={{
-                fontSize: '14px',
-                color: '#6b7280'
-              }}>
-                2023
-              </div>
-            </div>
-          </div>
+			// Occupancy
+			const totalUnits = properties.reduce((sum, p) => sum + (p.units || 1), 0);
+			const occupiedUnits = leases.filter(l => l.status === 'active').length;
+			const vacantUnits = totalUnits - occupiedUnits;
+			const occupancyPercent = totalUnits ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
 
-          {/* Collected */}
-          <div style={{ textAlign: 'right' }}>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '8px'
-            }}>
-              Collected
-            </div>
-            <div style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#10b981',
-              marginBottom: '4px'
-            }}>
-              $3,250.00
-            </div>
-            <div style={{
-              fontSize: '12px',
-              color: '#10b981',
-              fontWeight: '500'
-            }}>
-              76% COLLECTED
-            </div>
-          </div>
-        </div>
+			// Overdue units
+			const unitsWithOverdue = leases.filter(l => l.overdueAmount > 0).length;
 
-        {/* Bottom Stats */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr 1fr',
-          gap: '24px',
-          marginTop: '32px',
-          paddingTop: '24px',
-          borderTop: '1px solid #f3f4f6'
-        }}>
-          <div>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '8px'
-            }}>
-              Units with Invoices Due
-            </div>
-            <div style={{
-              fontSize: '24px',
-              fontWeight: '700',
-              color: '#374151'
-            }}>
-              1/2
-            </div>
-            <div style={{ marginTop: '8px' }}>
-              🏠 <span style={{ color: '#3b82f6', fontSize: '12px', cursor: 'pointer' }}>View All</span>
-            </div>
-          </div>
+			const handleAddTenant = () => {
+				if (onNavigate) onNavigate('LeasesFiles');
+			};
 
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '8px'
-            }}>
-              Processing: $0.00
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '8px'
-            }}>
-              Total: $4,300.00
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280'
-            }}>
-              Past Outstanding: $0.00
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'right' }}>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '8px'
-            }}>
-              Units with Invoices Paid
-            </div>
-            <div style={{
-              fontSize: '24px',
-              fontWeight: '700',
-              color: '#374151'
-            }}>
-              1/2
-            </div>
-            <div style={{ marginTop: '8px' }}>
-              🏠 <span style={{ color: '#3b82f6', fontSize: '12px', cursor: 'pointer' }}>View All</span>
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'right' }}>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '8px'
-            }}>
-              Occupancy Statistics
-            </div>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '16px'
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{
-                  fontSize: '24px',
-                  fontWeight: '700',
-                  color: '#ef4444'
-                }}>
-                  2
-                </div>
-                <div style={{
-                  fontSize: '12px',
-                  color: '#6b7280'
-                }}>
-                  Vacant
-                </div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{
-                  fontSize: '24px',
-                  fontWeight: '700',
-                  color: '#10b981'
-                }}>
-                  2
-                </div>
-                <div style={{
-                  fontSize: '12px',
-                  color: '#6b7280'
-                }}>
-                  Occupied
-                </div>
-              </div>
-              <div style={{
-                width: '60px',
-                height: '60px',
-                position: 'relative'
-              }}>
-                <svg width="60" height="60" style={{ transform: 'rotate(-90deg)' }}>
-                  <circle
-                    cx="30"
-                    cy="30"
-                    r="25"
-                    fill="none"
-                    stroke="#f3f4f6"
-                    strokeWidth="6"
-                  />
-                  <circle
-                    cx="30"
-                    cy="30"
-                    r="25"
-                    fill="none"
-                    stroke="#10b981"
-                    strokeWidth="6"
-                    strokeDasharray="157.08"
-                    strokeDashoffset="78.54"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  fontSize: '10px',
-                  fontWeight: '600',
-                  color: '#374151'
-                }}>
-                  50%
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Section */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr 1fr',
-        gap: '24px'
-      }}>
-        {/* Unsigned Leases */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '12px',
-          padding: '24px',
-          boxShadow: '0 4px 16px 0 rgba(0, 0, 0, 0.08)',
-          border: '1px solid rgba(0, 0, 0, 0.05)'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            marginBottom: '24px'
-          }}>
-            <div style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#374151'
-            }}>
-              📄 UNSIGNED LEASES
-            </div>
-          </div>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '120px',
-            color: '#9ca3af'
-          }}>
-            <div style={{
-              fontSize: '48px',
-              marginBottom: '12px'
-            }}>
-              📄
-            </div>
-            <div style={{ fontSize: '14px' }}>
-              No Records Found
-            </div>
-          </div>
-        </div>
-
-        {/* Applications Processing */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '12px',
-          padding: '24px',
-          boxShadow: '0 4px 16px 0 rgba(0, 0, 0, 0.08)',
-          border: '1px solid rgba(0, 0, 0, 0.05)'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            marginBottom: '24px'
-          }}>
-            <div style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#374151'
-            }}>
-              📋 APPLICATIONS PROCESSING
-            </div>
-          </div>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '120px',
-            color: '#9ca3af'
-          }}>
-            <div style={{
-              fontSize: '48px',
-              marginBottom: '12px'
-            }}>
-              📋
-            </div>
-            <div style={{ fontSize: '14px' }}>
-              No Records Found
-            </div>
-          </div>
-        </div>
-
-        {/* Open Maintenance Requests */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '12px',
-          padding: '24px',
-          boxShadow: '0 4px 16px 0 rgba(0, 0, 0, 0.08)',
-          border: '1px solid rgba(0, 0, 0, 0.05)'
-        }}>
-          <div style={{
-            fontSize: '18px',
-            fontWeight: '600',
-            color: '#374151',
-            marginBottom: '12px'
-          }}>
-            🔧 OPEN MAINTENANCE REQUESTS
-          </div>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '120px',
-            color: '#9ca3af'
-          }}>
-            <div style={{
-              fontSize: '48px',
-              marginBottom: '12px'
-            }}>
-              🔧
-            </div>
-            <div style={{ fontSize: '14px' }}>
-              There are no maintenance requests
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+			return (
+				<div style={{ padding: 32 }}>
+				{/* Top right action buttons */}
+				<div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginBottom: 20 }}>
+					<button
+						style={{
+							background: '#f3f4f6',
+							color: '#222',
+							border: '1px solid #e5e7eb',
+							borderRadius: '8px',
+							padding: '10px 18px',
+							fontSize: '15px',
+							fontWeight: 500,
+							cursor: 'pointer',
+							marginRight: 4
+						}}
+					>
+						🧾 Record Payment
+					</button>
+					<button
+						onClick={handleAddTenant}
+						style={{
+							background: '#10b981',
+							color: 'white',
+							border: 'none',
+							borderRadius: '8px',
+							padding: '10px 18px',
+							fontSize: '15px',
+							fontWeight: 500,
+							cursor: 'pointer',
+							marginLeft: 4
+						}}
+					>
+						👤 Add Tenant
+					</button>
+				</div>
+				<div
+					style={{
+						display: 'grid',
+						gridTemplateColumns: '2.5fr 1fr',
+						gap: '24px',
+						marginBottom: '32px',
+						alignItems: 'start',
+					}}
+				>
+				{/* Left: Collection Stats Card */}
+						<div style={{
+							background: 'white',
+							borderRadius: '16px',
+							boxShadow: '0 4px 16px 0 rgba(0,0,0,0.08)',
+							border: '1px solid #e5e7eb',
+							padding: '32px',
+							minHeight: 320,
+						}}>
+							<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+								<div style={{ fontSize: 20, fontWeight: 600, color: '#222' }}>Collection Stats</div>
+								<select style={{ border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 12px', fontSize: '15px', background: 'white', color: '#334155' }}>
+									<option>May 2023</option>
+								</select>
+							</div>
+							<div style={{ display: 'flex', alignItems: 'center', gap: '32px', justifyContent: 'space-between' }}>
+								{/* Donut Chart + Total */}
+								<div style={{ position: 'relative', width: 180, height: 180, margin: '0 8px' }}>
+									<svg width="180" height="180" style={{ transform: 'rotate(-90deg)' }}>
+										<circle cx="90" cy="90" r="80" fill="none" stroke="#f3f4f6" strokeWidth="18" />
+										<circle
+											cx="90" cy="90" r="80" fill="none" stroke="#10b981" strokeWidth="18"
+											strokeDasharray="502.65"
+											strokeDashoffset={(502.65 * (1 - percentCollected / 100)).toFixed(2)}
+											strokeLinecap="round"
+										/>
+									</svg>
+									<div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+										<div style={{ fontSize: '18px', color: '#10b981', fontWeight: 700 }}>Total</div>
+										<div style={{ fontSize: '24px', color: '#10b981', fontWeight: 700 }}>${totalAmount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+									</div>
+								</div>
+								{/* Stat Columns */}
+								<div style={{ display: 'flex', flex: 1, justifyContent: 'space-between', gap: 24 }}>
+									<div style={{ minWidth: 120, textAlign: 'center' }}>
+										<div style={{ fontSize: '15px', color: '#10b981', fontWeight: 700, marginBottom: 4 }}>Collected</div>
+										<div style={{ fontSize: '22px', fontWeight: 700, color: '#10b981', marginBottom: 2 }}>${totalCollected.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+										<div style={{ fontSize: '14px', color: '#10b981', fontWeight: 600 }}>{percentCollected.toFixed(1)}%</div>
+									</div>
+									<div style={{ minWidth: 120, textAlign: 'center' }}>
+										<div style={{ fontSize: '15px', color: '#ef4444', fontWeight: 700, marginBottom: 4 }}>Overdue</div>
+										<div style={{ fontSize: '22px', fontWeight: 700, color: '#ef4444', marginBottom: 2 }}>${totalOverdue.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+										<div style={{ fontSize: '14px', color: '#ef4444', fontWeight: 600 }}>{percentOverdue.toFixed(1)}%</div>
+									</div>
+									<div style={{ minWidth: 120, textAlign: 'center' }}>
+										<div style={{ fontSize: '15px', color: '#f59e42', fontWeight: 700, marginBottom: 4 }}>Processing</div>
+										<div style={{ fontSize: '22px', fontWeight: 700, color: '#f59e42', marginBottom: 2 }}>${totalProcessing.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+										<div style={{ fontSize: '14px', color: '#f59e42', fontWeight: 600 }}>{percentProcessing.toFixed(1)}%</div>
+									</div>
+									<div style={{ minWidth: 120, textAlign: 'center' }}>
+										<div style={{ fontSize: '15px', color: '#0ea5e9', fontWeight: 700, marginBottom: 4 }}>Coming Due</div>
+										<div style={{ fontSize: '22px', fontWeight: 700, color: '#0ea5e9', marginBottom: 2 }}>${totalComingDue.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+										<div style={{ fontSize: '14px', color: '#0ea5e9', fontWeight: 600 }}>{percentComingDue.toFixed(1)}%</div>
+									</div>
+								</div>
+								{/* Units with Overdue Balance */}
+								<div style={{ minWidth: 120, textAlign: 'center', borderLeft: '1px solid #e5e7eb', paddingLeft: 24 }}>
+									<div style={{ fontSize: 15, color: '#64748b', marginBottom: 8 }}>Units with Overdue Balance</div>
+									<div style={{ fontSize: 22, fontWeight: 700, color: '#ef4444' }}>{unitsWithOverdue}/{leases.length}</div>
+									<div style={{ marginTop: 8, fontSize: 13, color: '#3b82f6', cursor: 'pointer' }}>View All</div>
+								</div>
+							</div>
+							{/* Past Overdue Row */}
+							<div style={{ marginTop: 24, background: '#f8fafc', borderRadius: 8, padding: '12px 20px', color: '#ef4444', fontWeight: 600, fontSize: 15 }}>
+								Past Overdue: $0.00
+							</div>
+						</div>
+				{/* Right: Occupancy and Maintenance stacked */}
+				<div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+					{/* Occupancy Statistics */}
+					<div style={{
+						background: 'white',
+						borderRadius: '12px',
+						boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+						padding: '20px',
+						display: 'flex',
+						flexDirection: 'column',
+						alignItems: 'center',
+						minHeight: 120
+					}}>
+									<div style={{ fontSize: 15, color: '#64748b', marginBottom: 8 }}>Occupancy Statistics</div>
+									<div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+										<div style={{ textAlign: 'center' }}>
+											<div style={{ fontSize: 22, fontWeight: 700, color: '#ef4444' }}>{vacantUnits}</div>
+											<div style={{ fontSize: 12, color: '#6b7280' }}>Vacant</div>
+										</div>
+										<div style={{ textAlign: 'center' }}>
+											<div style={{ fontSize: 22, fontWeight: 700, color: '#10b981' }}>{occupiedUnits}</div>
+											<div style={{ fontSize: 12, color: '#6b7280' }}>Occupied</div>
+										</div>
+										<div style={{ width: 48, height: 48, position: 'relative' }}>
+											<svg width="48" height="48" style={{ transform: 'rotate(-90deg)' }}>
+												<circle cx="24" cy="24" r="20" fill="none" stroke="#f3f4f6" strokeWidth="6" />
+												<circle cx="24" cy="24" r="20" fill="none" stroke="#10b981" strokeWidth="6" strokeDasharray="125.66" strokeDashoffset={(125.66 * (1 - occupancyPercent / 100)).toFixed(2)} strokeLinecap="round" />
+											</svg>
+											<div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: 11, fontWeight: 600, color: '#374151' }}>{occupancyPercent}</div>
+										</div>
+									</div>
+					</div>
+					{/* Open Maintenance Requests */}
+					<div style={{
+						background: 'white',
+						borderRadius: '12px',
+						boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+						padding: '20px',
+						display: 'flex',
+						flexDirection: 'column',
+						alignItems: 'center',
+						minHeight: 120
+					}}>
+						<div style={{ fontSize: 15, color: '#64748b', marginBottom: 8 }}>Open Maintenance Requests</div>
+						<div style={{ fontSize: 22, color: '#10b981', fontWeight: 700 }}>1 Open</div>
+						<div style={{ fontSize: 22, color: '#f59e42', fontWeight: 700 }}>1 Scheduled</div>
+						<div style={{ fontSize: 14, color: '#9ca3af', marginTop: 8 }}>By Category</div>
+						<div style={{ width: '100%', height: 40, background: '#f3f4f6', borderRadius: 6, marginTop: 4, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 8 }}>
+							<div style={{ width: 12, height: 20, background: '#10b981', borderRadius: 3 }}></div>
+							<div style={{ width: 12, height: 10, background: '#f59e42', borderRadius: 3 }}></div>
+							<div style={{ width: 12, height: 5, background: '#ef4444', borderRadius: 3 }}></div>
+							<div style={{ width: 12, height: 0, background: '#0ea5e9', borderRadius: 3 }}></div>
+						</div>
+					</div>
+				</div>
+			</div>
+					{/* Bottom Grid: Unsigned Leases & Applications Processing */}
+					<div style={{
+						display: 'grid',
+						gridTemplateColumns: '1fr 1fr',
+						gap: '24px',
+						marginBottom: '32px',
+					}}>
+						{/* Unsigned Leases */}
+						<div style={{
+							background: 'white',
+							borderRadius: '12px',
+							boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+							padding: '24px',
+							display: 'flex',
+							flexDirection: 'column',
+							minHeight: 120
+						}}>
+							<div style={{ fontSize: 18, fontWeight: 600, color: '#374151', marginBottom: 16 }}>📄 UNSIGNED LEASES</div>
+							{/* Example lease row */}
+							<div style={{
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'space-between',
+								width: '100%',
+								padding: '16px 0',
+								borderBottom: '1px solid #f3f4f6',
+								gap: 12
+							}}>
+								<div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+									<span style={{ fontSize: 28, color: '#60a5fa' }}>🏠</span>
+									<div>
+										<div style={{ fontWeight: 600, color: '#222', fontSize: 15 }}>Jefferson Ave Ap...</div>
+										<div style={{ fontSize: 13, color: '#64748b' }}>0 of 1 tenants signed.</div>
+									</div>
+								</div>
+								<div style={{ display: 'flex', gap: 8 }}>
+									<button style={{ background: '#f3f4f6', color: '#222', border: '1px solid #e5e7eb', borderRadius: 6, padding: '6px 12px', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Send Reminder</button>
+									<button style={{ background: '#10b981', color: 'white', border: 'none', borderRadius: 6, padding: '6px 12px', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Sign Lease</button>
+								</div>
+							</div>
+						</div>
+						{/* Applications Processing */}
+						<div style={{
+							background: 'white',
+							borderRadius: '12px',
+							boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+							padding: '24px',
+							display: 'flex',
+							flexDirection: 'column',
+							minHeight: 120
+						}}>
+							<div style={{ fontSize: 18, fontWeight: 600, color: '#374151', marginBottom: 16 }}>📋 APPLICATIONS PROCESSING</div>
+							{/* Example applicant rows */}
+							<div style={{ padding: '10px 0', borderBottom: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: 6 }}>
+								<div style={{ fontWeight: 600, color: '#222', fontSize: 15 }}>Franklin Tandy</div>
+								<div style={{ fontSize: 13, color: '#64748b' }}>Applied on Jan 30, 2025</div>
+							</div>
+							<div style={{ padding: '10px 0', borderBottom: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: 6 }}>
+								<div style={{ fontWeight: 600, color: '#222', fontSize: 15 }}>Patrick Nistro</div>
+								<div style={{ fontSize: 13, color: '#64748b' }}>Applied on Jan 30, 2025</div>
+							</div>
+						</div>
+					</div>
+		</div>
+	);
 };
 
 export default DashboardPage;

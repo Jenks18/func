@@ -38,26 +38,60 @@ const tooltipContainerStyle = {
 
 const tooltipStyle = {
   position: 'fixed',
-  background: '#222',
-  color: 'white',
+  background: 'white',
+  color: '#222',
   fontSize: '12px',
-  padding: '7px 12px',
-  borderRadius: '6px',
+  padding: '12px 16px',
+  borderRadius: '8px',
   whiteSpace: 'pre-line',
   zIndex: 9999,
   boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
   pointerEvents: 'none',
   opacity: 0,
   transition: 'opacity 0.15s',
-  maxWidth: '260px',
+  maxWidth: '320px',
   left: 0,
   top: 0,
+  border: '1px solid #e5e7eb',
+  fontFamily: 'Inter, Helvetica Neue, Arial, sans-serif',
+  lineHeight: 1.6
 };
 
 function SortableHeader({ label, onSort, tooltip, width, children, sortState }) {
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPos, setTooltipPos] = useState({ left: 0, top: 0 });
   const iconRef = React.useRef();
+
+  // Custom tooltip for 90-Day Lease Expiration with colored indicators (all 4 colors)
+  const customTooltip = label === "90-Day Lease Expiration" ? (
+    <div style={{
+      ...tooltipStyle,
+      opacity: 1,
+      left: tooltipPos.left,
+      top: tooltipPos.top,
+      pointerEvents: 'none',
+      position: 'fixed',
+    }}>
+      <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
+        <span style={{display:'inline-block',width:12,height:12,borderRadius:'50%',background:'#10b981',marginRight:8,border:'1.5px solid #e5e7eb'}}></span>
+        Lease not expiring in the next 90 Days
+      </div>
+      <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
+        <span style={{display:'inline-block',width:12,height:12,borderRadius:'50%',background:'#f59e0b',marginRight:8,border:'1.5px solid #e5e7eb'}}></span>
+        Expiring lease in next 90 days with future lease starting.
+      </div>
+      <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
+        <span style={{display:'inline-block',width:12,height:12,borderRadius:'50%',background:'#ef4444',marginRight:8,border:'1.5px solid #e5e7eb'}}></span>
+        Expiring lease with no lease within 30 days of expiration.
+      </div>
+      <div style={{display:'flex',alignItems:'center',gap:8}}>
+        <span style={{display:'inline-block',width:12,height:12,borderRadius:'50%',background:'#6b7280',marginRight:8,border:'1.5px solid #e5e7eb'}}></span>
+        Month to Month Lease
+      </div>
+    </div>
+  ) : tooltip && (
+    <span style={{ ...tooltipStyle, opacity: 1, left: tooltipPos.left, top: tooltipPos.top, pointerEvents: 'none', position: 'fixed' }}>{tooltip}</span>
+  );
 
   const handleTooltip = (e) => {
     const rect = e.target.getBoundingClientRect();
@@ -91,9 +125,7 @@ function SortableHeader({ label, onSort, tooltip, width, children, sortState }) 
             ref={iconRef}
           >
             <span style={{ color: '#b0b0b0', fontSize: '12px', marginLeft: '1px', cursor: 'pointer' }}>ⓘ</span>
-            {showTooltip && (
-              <span style={{ ...tooltipStyle, opacity: 1, left: tooltipPos.left, top: tooltipPos.top, pointerEvents: 'none', position: 'fixed' }}>{tooltip}</span>
-            )}
+            {showTooltip && customTooltip}
           </span>
         )}
         {children}
@@ -137,7 +169,9 @@ const PropertiesTableHeader = ({ handleSort, sortColumn, sortOrder }) => (
       <SortableHeader
         label="90-Day Lease Expiration"
         onSort={() => handleSort('expiration')}
-        tooltip={"90-Day Lease Expiration Status\n• Green: Not expiring\n• Orange: Expiring with future lease\n• Red: Expiring, no future lease\n• Blue: Month to Month"}
+        tooltip={
+          `Lease not expiring in the next 90 Days\nExpiring lease in next 90 days with future lease starting.\nExpiring lease with no lease within 30 days of expiration.\nMonth to Month Lease`
+        }
         width="160px"
         sortState={sortColumn === 'expiration' ? sortOrder : null}
       />
