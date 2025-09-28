@@ -945,7 +945,7 @@ export default function LeasesFilesPage() {
         }}>
           {activeMainTab === 'leases' && (
             <button
-              onClick={() => setShowWizard(true)}
+              onClick={() => setShowNewLeaseWizard(true)}
               style={{
                 background: '#3b82f6',
                 color: 'white',

@@ -227,6 +227,30 @@ class TenantService {
       throw error;
     }
   }
+
+  async addReminder(reminder) {
+    try {
+      return await db.add('reminders', {
+        ...reminder,
+        createdAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error adding reminder:', error);
+      throw error;
+    }
+  }
+
+  async getReminders(tenantId = null) {
+    try {
+      if (tenantId) {
+        return await db.query('reminders', 'tenantId', tenantId);
+      }
+      return await db.getAll('reminders');
+    } catch (error) {
+      console.error('Error getting reminders:', error);
+      return [];
+    }
+  }
 }
 
 export default new TenantService();

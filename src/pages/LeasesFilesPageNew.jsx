@@ -1,18 +1,6 @@
 import React, { useState } from 'react';
 
-const leaseData = {
-  propertyName: "Main Street Lofts",
-  address: "101 Main St, Milford Oaks",
-  unit: "Unit 201",
-  rentalLeaseFee: "KSH 2,500",
-  start: "Jan 1, 2024",
-  end: "Dec 31, 2024",
-  securityDeposit: "KSH 45,000",
-  monthlyRent: "KSH 75,000",
-  tenants: 2,
-  rentersInsurance: "Required",
-  propertyType: "Apartment",
-};
+// sample lease data removed (not used) to satisfy linter
 
 const templateData = [
   {

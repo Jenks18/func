@@ -93,6 +93,15 @@ class DatabaseService {
       expensesStore.createIndex('vendor', 'vendor', { unique: false });
     }
 
+    // Reminders table
+    if (!db.objectStoreNames.contains('reminders')) {
+      const remindersStore = db.createObjectStore('reminders', { keyPath: 'id' });
+      remindersStore.createIndex('tenantId', 'tenantId', { unique: false });
+      remindersStore.createIndex('type', 'type', { unique: false });
+      remindersStore.createIndex('sentAt', 'sentAt', { unique: false });
+      remindersStore.createIndex('createdAt', 'createdAt', { unique: false });
+    }
+
     console.log('Database schema created successfully');
   }
 

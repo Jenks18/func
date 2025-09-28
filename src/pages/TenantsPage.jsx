@@ -1001,7 +1001,7 @@ export default function TenantsPage() {
                     </div>
                     
                     {/* Message Rows */}
-                    {selectedTenantDetails.messageHistory.map((message) => (
+                    {selectedTenant?.messageHistory?.map((message) => (
                       <div key={message.id} style={{
                         display: 'grid',
                         gridTemplateColumns: '80px 80px 1fr 100px',
@@ -1038,7 +1038,7 @@ export default function TenantsPage() {
                       borderRadius: '8px',
                       padding: '16px'
                     }}>
-                      {selectedTenantDetails.leaseHistory.map((entry) => (
+                      {selectedTenant?.leaseHistory?.map((entry) => (
                         <div key={entry.id} style={{
                           display: 'flex',
                           alignItems: 'center',

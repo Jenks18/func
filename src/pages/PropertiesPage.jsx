@@ -12,7 +12,7 @@ export default function PropertiesPage() {
   const [expandedPropertyId, setExpandedPropertyId] = useState(null);
   const [selectedUnit, setSelectedUnit] = useState(null); // { property, unit }
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null); // Keep setError but ignore the getter
   const [showNewProperty, setShowNewProperty] = useState(false);
   const [sortColumn, setSortColumn] = useState('');
   const [sortOrder, setSortOrder] = useState('asc');

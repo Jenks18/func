@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import propertyService from '../services/propertyService';
 import tenantService from '../services/tenantService';
 import leaseService from '../services/leaseService';
+import SendReminderModal from '../components/modals/SendReminderModal';
+import RecordPaymentModal from '../components/modals/RecordPaymentModal';
 
 const DashboardPage = ({ onNavigate }) => {
   // Only render the main dashboard grid layout (Collection Stats, Occupancy, Maintenance, Unsigned Leases, Applications Processing)
@@ -29,7 +31,7 @@ const DashboardPage = ({ onNavigate }) => {
 			}, []);
 
 			// Example calculations (replace with real logic as needed)
-			const totalCollected = leases.reduce((sum, l) => sum + (l.collectedAmount || 0), 0);
+			const totalCollected = leases.reduce((sum, l) => sum + (l.totalPayments || 0), 0);
 			const totalOverdue = leases.reduce((sum, l) => sum + (l.overdueAmount || 0), 0);
 			const totalProcessing = leases.reduce((sum, l) => sum + (l.processingAmount || 0), 0);
 			const totalComingDue = leases.reduce((sum, l) => sum + (l.comingDueAmount || 0), 0);
@@ -40,23 +42,98 @@ const DashboardPage = ({ onNavigate }) => {
 			const percentComingDue = totalAmount ? (totalComingDue / totalAmount) * 100 : 0;
 
 			// Occupancy
-			const totalUnits = properties.reduce((sum, p) => sum + (p.units || 1), 0);
-			const occupiedUnits = leases.filter(l => l.status === 'active').length;
-			const vacantUnits = totalUnits - occupiedUnits;
+			const totalUnits = properties.reduce((sum, p) => sum + (p.unitDetails ? p.unitDetails.length : (p.units || 1)), 0);
+			const occupiedUnits = leases.filter(l => (l.status || '').toLowerCase() === 'active').length;
+			const vacantUnits = Math.max(0, totalUnits - occupiedUnits);
 			const occupancyPercent = totalUnits ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
 
 			// Overdue units
-			const unitsWithOverdue = leases.filter(l => l.overdueAmount > 0).length;
+			const unitsWithOverdue = leases.filter(l => (l.overdueAmount || 0) > 0).length;
 
-			const handleAddTenant = () => {
-				if (onNavigate) onNavigate('LeasesFiles');
+		// Derived lists for UI
+		const unsignedLeases = leases.filter(l => {
+			const sigs = l.signatures;
+			return !sigs || Object.keys(sigs || {}).length === 0;
+		});
+
+		const applicationsProcessing = tenants.filter(t => t.applicationStatus && t.applicationStatus !== 'No Applied Yet');
+
+		// Modal states
+		const [reminderModal, setReminderModal] = useState({ isOpen: false, tenant: null });
+		const [paymentModal, setPaymentModal] = useState({ isOpen: false, tenant: null });			const handleAddTenant = () => {
+				if (onNavigate) onNavigate('Tenants');
 			};
+
+		const handleRecordPayment = (tenant = null) => {
+			setPaymentModal({ isOpen: true, tenant });
+		};
+
+		const handleViewOverdue = () => {
+			if (onNavigate) onNavigate('Income');
+		};
+
+		const handleSignLease = (leaseId = null) => {
+			if (onNavigate) {
+				if (leaseId) {
+					// Navigate with lease ID for direct editing
+					onNavigate('LeasesFiles', { leaseId });
+				} else {
+					onNavigate('LeasesFiles');
+				}
+			}
+		};
+
+		const handleSendReminder = (tenant) => {
+			setReminderModal({ isOpen: true, tenant });
+		};
+
+		const handleReminderSent = async (reminderData) => {
+			try {
+				await tenantService.addReminder(reminderData);
+				setReminderModal({ isOpen: false, tenant: null });
+				// Optionally show success message
+			} catch (error) {
+				console.error('Failed to send reminder:', error);
+			}
+		};
+
+		const handlePaymentRecorded = async (paymentData) => {
+			try {
+				await tenantService.addTenantPayment(paymentData.tenantId, paymentData);
+				setPaymentModal({ isOpen: false, tenant: null });
+				// Refresh data after payment
+				const [updatedProps, updatedTenants, updatedLeases] = await Promise.all([
+					propertyService.getAllProperties(),
+					tenantService.getAllTenants(),
+					leaseService.getAllLeases(),
+				]);
+				setProperties(updatedProps || []);
+				setTenants(updatedTenants || []);
+				setLeases(updatedLeases || []);
+			} catch (error) {
+				console.error('Failed to record payment:', error);
+				throw error;
+			}
+		};
+
+		const handleTenantClick = (tenantId) => {
+			if (onNavigate) onNavigate('Tenants', { selectedTenantId: tenantId });
+		};
+
+		const handleLeaseClick = (leaseId) => {
+			if (onNavigate) onNavigate('LeasesFiles', { selectedLeaseId: leaseId });
+		};			if (loading) {
+				return (
+					<div style={{ padding: 32, color: '#64748b' }}>Loading dashboard...</div>
+				);
+			}
 
 			return (
 				<div style={{ padding: 32 }}>
 				{/* Top right action buttons */}
 				<div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginBottom: 20 }}>
 					<button
+						onClick={handleRecordPayment}
 						style={{
 							background: '#f3f4f6',
 							color: '#222',
@@ -156,7 +233,7 @@ const DashboardPage = ({ onNavigate }) => {
 								<div style={{ minWidth: 120, textAlign: 'center', borderLeft: '1px solid #e5e7eb', paddingLeft: 24 }}>
 									<div style={{ fontSize: 15, color: '#64748b', marginBottom: 8 }}>Units with Overdue Balance</div>
 									<div style={{ fontSize: 22, fontWeight: 700, color: '#ef4444' }}>{unitsWithOverdue}/{leases.length}</div>
-									<div style={{ marginTop: 8, fontSize: 13, color: '#3b82f6', cursor: 'pointer' }}>View All</div>
+									<div onClick={handleViewOverdue} style={{ marginTop: 8, fontSize: 13, color: '#3b82f6', cursor: 'pointer' }}>View All</div>
 								</div>
 							</div>
 							{/* Past Overdue Row */}
@@ -238,28 +315,49 @@ const DashboardPage = ({ onNavigate }) => {
 							minHeight: 120
 						}}>
 							<div style={{ fontSize: 18, fontWeight: 600, color: '#374151', marginBottom: 16 }}>📄 UNSIGNED LEASES</div>
-							{/* Example lease row */}
-							<div style={{
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'space-between',
-								width: '100%',
-								padding: '16px 0',
-								borderBottom: '1px solid #f3f4f6',
-								gap: 12
-							}}>
-								<div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-									<span style={{ fontSize: 28, color: '#60a5fa' }}>🏠</span>
-									<div>
-										<div style={{ fontWeight: 600, color: '#222', fontSize: 15 }}>Jefferson Ave Ap...</div>
-										<div style={{ fontSize: 13, color: '#64748b' }}>0 of 1 tenants signed.</div>
+							{unsignedLeases.length === 0 && (
+								<div style={{ color: '#64748b', fontSize: 13 }}>No unsigned leases</div>
+							)}
+							{unsignedLeases.slice(0, 4).map((lease) => (
+								<div key={lease.id} style={{
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'space-between',
+									width: '100%',
+									padding: '12px 0',
+									borderBottom: '1px solid #f3f4f6',
+									gap: 12
+								}}>
+									<div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+										<span style={{ fontSize: 24, color: '#60a5fa' }}>🏠</span>
+										<div>
+											<div 
+												onClick={() => handleLeaseClick(lease.id)}
+												style={{ fontWeight: 600, color: '#3b82f6', fontSize: 15, cursor: 'pointer' }}
+											>
+												{lease.property?.name || lease.unit?.unitNumber || 'Unknown Property'}
+											</div>
+											<div style={{ fontSize: 13, color: '#64748b' }}>
+												{lease.signatures && Object.keys(lease.signatures || {}).length || 0}/{lease.tenants?.length || 1} tenants signed.
+											</div>
+										</div>
+									</div>
+									<div style={{ display: 'flex', gap: 8 }}>
+										<button 
+											onClick={() => handleSendReminder(lease.tenant)} 
+											style={{ background: '#f3f4f6', color: '#222', border: '1px solid #e5e7eb', borderRadius: 6, padding: '6px 12px', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}
+										>
+											Send Reminder
+										</button>
+										<button 
+											onClick={() => handleSignLease(lease.id)} 
+											style={{ background: '#10b981', color: 'white', border: 'none', borderRadius: 6, padding: '6px 12px', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}
+										>
+											Sign Lease
+										</button>
 									</div>
 								</div>
-								<div style={{ display: 'flex', gap: 8 }}>
-									<button style={{ background: '#f3f4f6', color: '#222', border: '1px solid #e5e7eb', borderRadius: 6, padding: '6px 12px', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Send Reminder</button>
-									<button style={{ background: '#10b981', color: 'white', border: 'none', borderRadius: 6, padding: '6px 12px', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Sign Lease</button>
-								</div>
-							</div>
+							))}
 						</div>
 						{/* Applications Processing */}
 						<div style={{
@@ -272,17 +370,49 @@ const DashboardPage = ({ onNavigate }) => {
 							minHeight: 120
 						}}>
 							<div style={{ fontSize: 18, fontWeight: 600, color: '#374151', marginBottom: 16 }}>📋 APPLICATIONS PROCESSING</div>
-							{/* Example applicant rows */}
-							<div style={{ padding: '10px 0', borderBottom: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: 6 }}>
-								<div style={{ fontWeight: 600, color: '#222', fontSize: 15 }}>Franklin Tandy</div>
-								<div style={{ fontSize: 13, color: '#64748b' }}>Applied on Jan 30, 2025</div>
-							</div>
-							<div style={{ padding: '10px 0', borderBottom: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: 6 }}>
-								<div style={{ fontWeight: 600, color: '#222', fontSize: 15 }}>Patrick Nistro</div>
-								<div style={{ fontSize: 13, color: '#64748b' }}>Applied on Jan 30, 2025</div>
-							</div>
+							{applicationsProcessing.length === 0 && (
+								<div style={{ color: '#64748b', fontSize: 13 }}>No applications in process</div>
+							)}
+							{applicationsProcessing.slice(0, 6).map((app) => (
+								<div key={app.id} style={{ padding: '10px 0', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+									<div style={{ flex: 1 }}>
+										<div 
+											style={{ fontWeight: 600, color: '#3b82f6', fontSize: 15, cursor: 'pointer' }} 
+											onClick={() => handleTenantClick(app.id)}
+										>
+											{app.firstName} {app.lastName}
+										</div>
+										<div style={{ fontSize: 13, color: '#64748b' }}>
+											{app.applicationDate || app.appliedOn || 'Applied recently'}
+										</div>
+									</div>
+									<div style={{ display: 'flex', gap: 8 }}>
+										<button 
+											onClick={() => handleSendReminder(app)} 
+											style={{ background: '#f59e0b', color: 'white', border: 'none', borderRadius: 4, padding: '4px 8px', fontSize: 12, fontWeight: 500, cursor: 'pointer' }}
+										>
+											Follow Up
+										</button>
+									</div>
+								</div>
+							))}
 						</div>
 					</div>
+
+			{/* Modals */}
+			<SendReminderModal
+				isOpen={reminderModal.isOpen}
+				onClose={() => setReminderModal({ isOpen: false, tenant: null })}
+				tenant={reminderModal.tenant}
+				onSendReminder={handleReminderSent}
+			/>
+
+			<RecordPaymentModal
+				isOpen={paymentModal.isOpen}
+				onClose={() => setPaymentModal({ isOpen: false, tenant: null })}
+				tenant={paymentModal.tenant}
+				onPaymentRecorded={handlePaymentRecorded}
+			/>
 		</div>
 	);
 };

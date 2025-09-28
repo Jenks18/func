@@ -14,7 +14,7 @@ export default function UnitDetail({ property, unit, onBack, allProperties, onUn
   const baths = unit.baths || 1;
   const washer = 1;
   const fridge = 1;
-  const floors = 1;
+  // const floors = 1; // Unused variable
 
 
   // Sidebar: property/unit switcher

@@ -156,8 +156,12 @@ export default function App() {
     );
   }
 
-  const handleNavigation = (component) => {
+  const handleNavigation = (component, params = {}) => {
     setCurrentPage(component);
+    // Store navigation parameters for the current page
+    if (params && Object.keys(params).length > 0) {
+      sessionStorage.setItem(`${component}_params`, JSON.stringify(params));
+    }
   };
 
   return (

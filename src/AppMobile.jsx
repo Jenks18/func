@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LeasesFilesPage from './pages/LeasesFilesPageNew';
 import DashboardPage from './pages/DashboardPage';
 import SettingsPage from './pages/SettingsPage';

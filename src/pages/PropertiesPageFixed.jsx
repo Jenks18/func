@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import dataService from '../services/dataService';
+// import dataService from '../services/dataService'; // Unused import
 import NewPropertyPage from './NewPropertyPage';
 
 export default function PropertiesPage() {
-  const [statusFilter, setStatusFilter] = useState('All Properties');
+  // const [statusFilter, setStatusFilter] = useState('All Properties'); // Unused state
   const [propertiesData, setPropertiesData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
