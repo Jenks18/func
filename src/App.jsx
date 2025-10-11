@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { SignedIn, SignedOut } from '@clerk/clerk-react';
 import LeasesFilesPage from './pages/LeasesFilesPageNew';
 import DashboardPage from './pages/DashboardPage';
 import SettingsPage from './pages/SettingsPage';
@@ -10,26 +12,197 @@ import DatabaseTestPage from './pages/DatabaseTestPage';
 import AppMobile from './AppMobile';
 import dataService from './services/dataService';
 
+// Auth Pages
+import SignInPage from './pages/auth/SignInPage';
+import SignUpPage from './pages/auth/SignUpPage';
+import OnboardingPage from './pages/auth/OnboardingPage';
+import CreateOrganizationPage from './pages/auth/CreateOrganizationPage';
+import OrganizationProfilePage from './pages/auth/OrganizationProfilePage';
+
+// Auth Components
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import OrganizationSwitcher from './components/auth/OrganizationSwitcher';
+import UserButton from './components/auth/UserButton';
+
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('Dashboard');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+
+  // Check screen size - now includes tablets
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 1024);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // If mobile/tablet, use mobile app (with its own routing)
+  if (isMobile) {
+    return <AppMobile />;
+  }
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/sign-in/*" element={<SignInPage />} />
+        <Route path="/sign-up/*" element={<SignUpPage />} />
+        
+        {/* Protected Routes */}
+        <Route
+          path="/onboarding"
+          element={
+            <SignedIn>
+              <OnboardingPage />
+            </SignedIn>
+          }
+        />
+        <Route
+          path="/create-organization"
+          element={
+            <SignedIn>
+              <CreateOrganizationPage />
+            </SignedIn>
+          }
+        />
+        <Route
+          path="/organization"
+          element={
+            <SignedIn>
+              <OrganizationProfilePage />
+            </SignedIn>
+          }
+        />
+        
+        {/* Main App Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <SignedIn>
+              <MainApp />
+            </SignedIn>
+          }
+        />
+        <Route
+          path="/properties"
+          element={
+            <SignedIn>
+              <MainApp />
+            </SignedIn>
+          }
+        />
+        <Route
+          path="/tenants"
+          element={
+            <SignedIn>
+              <MainApp />
+            </SignedIn>
+          }
+        />
+        <Route
+          path="/leases"
+          element={
+            <SignedIn>
+              <MainApp />
+            </SignedIn>
+          }
+        />
+        <Route
+          path="/income"
+          element={
+            <SignedIn>
+              <MainApp />
+            </SignedIn>
+          }
+        />
+        <Route
+          path="/expenses"
+          element={
+            <SignedIn>
+              <MainApp />
+            </SignedIn>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <SignedIn>
+              <MainApp />
+            </SignedIn>
+          }
+        />
+        
+        {/* Default route */}
+        <Route
+          path="/"
+          element={
+            <>
+              <SignedIn>
+                <Navigate to="/dashboard" replace />
+              </SignedIn>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+            </>
+          }
+        />
+        
+        {/* Catch all */}
+        <Route
+          path="*"
+          element={
+            <>
+              <SignedIn>
+                <Navigate to="/dashboard" replace />
+              </SignedIn>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+            </>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+// Main authenticated app component
+function MainApp() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [sidebarHovered, setSidebarHovered] = useState(false);
   const [hoveredItem, setHoveredItem] = useState(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
   const [isDbInitialized, setIsDbInitialized] = useState(false);
   const [dbError, setDbError] = useState(null);
 
+  // Determine current page from URL
+  const getCurrentPage = () => {
+    const path = location.pathname.replace('/', '');
+    if (path === '' || path === 'dashboard') return 'Dashboard';
+    if (path === 'properties') return 'Properties';
+    if (path === 'tenants') return 'Tenants';
+    if (path === 'leases') return 'LeasesFiles';
+    if (path === 'income') return 'Income';
+    if (path === 'expenses') return 'Expenses';
+    if (path === 'settings') return 'Settings';
+    return 'Dashboard';
+  };
+
+  const currentPage = getCurrentPage();
+
   const menuItems = [
-    { name: 'Dashboard', component: 'Dashboard', icon: '🏠' },
-    { name: 'Properties', component: 'Properties', icon: '🏢' },
-    { name: 'Tenants', component: 'Tenants', icon: '👥' },
-    { name: 'Applications', component: 'Applications', icon: '📝' },
-    { name: 'Leases & Files', component: 'LeasesFiles', icon: '📄' },
-    { name: 'Income', component: 'Income', icon: '💰' },
-    { name: 'Expenses', component: 'Expenses', icon: '💳' },
-    { name: 'Maintenance', component: 'Maintenance', icon: '🔧' },
-    { name: 'Messaging', component: 'Messaging', icon: '💬' },
-    { name: 'Listings', component: 'Listings', icon: '📋' }
+    { name: 'Dashboard', component: 'Dashboard', icon: '▢' },
+    { name: 'Properties', component: 'Properties', icon: '⌂' },
+    { name: 'Tenants', component: 'Tenants', icon: '◯' },
+    { name: 'Applications', component: 'Applications', icon: '☰' },
+    { name: 'Leases & Files', component: 'LeasesFiles', icon: '⎘' },
+    { name: 'Income', component: 'Income', icon: '↑' },
+    { name: 'Expenses', component: 'Expenses', icon: '↓' },
+    { name: 'Maintenance', component: 'Maintenance', icon: '⚒' },
+    { name: 'Messaging', component: 'Messaging', icon: '✉' },
+    { name: 'Listings', component: 'Listings', icon: '⊞' }
   ];
 
   // Initialize database
@@ -43,26 +216,13 @@ export default function App() {
       } catch (error) {
         console.error('Failed to initialize database:', error);
         setDbError(error.message);
+        // Don't block UI - just log the error
+        setIsDbInitialized(true); // Set to true anyway so UI loads
       }
     };
 
     initializeDatabase();
   }, []);
-
-  // Check screen size - now includes tablets
-  React.useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 1024); // Extended to include tablets
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // If mobile/tablet, use mobile app
-  if (isMobile) {
-    return <AppMobile />;
-  }
 
   // Show loading screen while database initializes
   if (!isDbInitialized && !dbError) {
@@ -70,7 +230,7 @@ export default function App() {
       <div style={{
         width: '100vw',
         height: '100vh',
-        background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%)',
+        background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -80,20 +240,20 @@ export default function App() {
         <div style={{
           fontSize: '24px',
           fontWeight: '600',
-          color: '#1e293b'
+          color: '#1e40af'
         }}>
           JumbaJot
         </div>
         <div style={{
           fontSize: '16px',
-          color: '#64748b'
+          color: '#60a5fa'
         }}>
-          Initializing database...
+          Loading your dashboard...
         </div>
         <div style={{
           width: '40px',
           height: '40px',
-          border: '4px solid #e2e8f0',
+          border: '4px solid #bfdbfe',
           borderTop: '4px solid #3b82f6',
           borderRadius: '50%',
           animation: 'spin 1s linear infinite'
@@ -110,54 +270,24 @@ export default function App() {
     );
   }
 
-  // Show error screen if database initialization failed
-  if (dbError) {
-    return (
-      <div style={{
-        width: '100vw',
-        height: '100vh',
-        background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        gap: '20px'
-      }}>
-        <div style={{
-          fontSize: '24px',
-          fontWeight: '600',
-          color: '#dc2626'
-        }}>
-          Database Error
-        </div>
-        <div style={{
-          fontSize: '16px',
-          color: '#64748b',
-          textAlign: 'center',
-          maxWidth: '400px'
-        }}>
-          Failed to initialize the database: {dbError}
-        </div>
-        <button 
-          onClick={() => window.location.reload()}
-          style={{
-            padding: '12px 24px',
-            background: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            fontSize: '14px',
-            cursor: 'pointer'
-          }}
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+  // Don't show error screen - just log it and continue
+  // This allows the app to work even without Supabase
 
   const handleNavigation = (component, params = {}) => {
-    setCurrentPage(component);
+    // Map component names to routes
+    const routeMap = {
+      'Dashboard': '/dashboard',
+      'Properties': '/properties',
+      'Tenants': '/tenants',
+      'LeasesFiles': '/leases',
+      'Income': '/income',
+      'Expenses': '/expenses',
+      'Settings': '/settings'
+    };
+    
+    const route = routeMap[component] || '/dashboard';
+    navigate(route);
+    
     // Store navigation parameters for the current page
     if (params && Object.keys(params).length > 0) {
       sessionStorage.setItem(`${component}_params`, JSON.stringify(params));
@@ -202,13 +332,12 @@ export default function App() {
         animation: 'gradientShift 20s ease infinite'
       }}>
       {/* Sidebar */}
-              {/* Sidebar */}
         <div 
           style={{
             width: sidebarExpanded || sidebarHovered ? '280px' : '72px',
-            background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
+            background: 'linear-gradient(180deg, #eff6ff 0%, #dbeafe 25%, #bfdbfe 50%, #93c5fd 75%, #60a5fa 100%)',
             backdropFilter: 'blur(20px)',
-            borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRight: '1px solid rgba(59, 130, 246, 0.1)',
             minHeight: '100vh',
             position: 'fixed',
             left: 0,
@@ -218,7 +347,7 @@ export default function App() {
             flexDirection: 'column',
             transition: 'width 0.3s ease',
             overflow: 'hidden',
-            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.12)'
+            boxShadow: '0 8px 32px 0 rgba(59, 130, 246, 0.15)'
           }}
           onMouseEnter={() => setSidebarHovered(true)}
           onMouseLeave={() => setSidebarHovered(false)}
@@ -226,38 +355,43 @@ export default function App() {
           {/* Logo */}
           <div style={{
             padding: (sidebarExpanded || sidebarHovered) ? '24px' : '20px 0',
-            borderBottom: '1px solid #334155',
+            borderBottom: '1px solid rgba(59, 130, 246, 0.2)',
             overflow: 'hidden',
             transition: 'padding 0.3s ease',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            minHeight: '72px'
+            minHeight: '72px',
+            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 100%)'
           }}>
             <h1 style={{
-              color: 'white',
               fontSize: '24px',
               fontWeight: 'bold',
               margin: 0,
               whiteSpace: 'nowrap',
               opacity: (sidebarExpanded || sidebarHovered) ? 1 : 0,
-              transition: 'opacity 0.3s ease'
+              transition: 'opacity 0.3s ease',
+              background: 'linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #60a5fa 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
             }}>
               {(sidebarExpanded || sidebarHovered) ? 'JumbaJot' : ''}
             </h1>
             {!(sidebarExpanded || sidebarHovered) && (
               <div style={{
-                color: 'white',
-                fontSize: '24px',
+                color: '#1e40af',
+                fontSize: '22px',
                 fontWeight: 'bold',
                 width: '40px',
                 height: '40px',
-                borderRadius: '8px',
-                background: 'rgba(59, 130, 246, 0.2)',
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '2px solid rgba(59, 130, 246, 0.3)'
+                border: '2px solid #3b82f6',
+                boxShadow: '0 2px 8px rgba(59, 130, 246, 0.25)'
               }}>
                 J
               </div>
@@ -275,24 +409,27 @@ export default function App() {
             {menuItems.map((item, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentPage(item.component)}
+                onClick={() => handleNavigation(item.component)}
                 style={{
                   width: '100%',
                   height: '48px',
                   padding: (sidebarExpanded || sidebarHovered) ? '0 16px' : '0',
-                  background: currentPage === item.component ? '#3b82f6' : 
-                             (hoveredItem === index ? '#475569' : 'transparent'),
-                  color: currentPage === item.component ? 'white' : '#cbd5e1',
+                  background: currentPage === item.component 
+                    ? 'linear-gradient(90deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)' 
+                    : (hoveredItem === index ? 'rgba(255, 255, 255, 0.3)' : 'transparent'),
+                  color: currentPage === item.component ? '#1e40af' : '#1e3a8a',
                   border: 'none',
+                  borderLeft: currentPage === item.component ? '4px solid #3b82f6' : '4px solid transparent',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: (sidebarExpanded || sidebarHovered) ? 'flex-start' : 'center',
                   gap: (sidebarExpanded || sidebarHovered) ? '16px' : '0',
                   fontSize: '14px',
-                  fontWeight: '500',
+                  fontWeight: currentPage === item.component ? '600' : '500',
                   transition: 'all 0.2s ease',
-                  position: 'relative'
+                  position: 'relative',
+                  borderRadius: currentPage === item.component ? '0 8px 8px 0' : '0'
                 }}
                 onMouseEnter={() => setHoveredItem(index)}
                 onMouseLeave={() => setHoveredItem(null)}
@@ -317,25 +454,29 @@ export default function App() {
             {/* Settings, unknown icon, and logout at the bottom */}
             <div style={{ marginTop: 'auto', padding: (sidebarExpanded || sidebarHovered) ? '0 16px 24px 16px' : '0 0 24px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
               <button
-                onClick={() => setCurrentPage('Settings')}
+                onClick={() => handleNavigation('Settings')}
                 style={{
                   width: '100%',
                   height: '48px',
-                  background: currentPage === 'Settings' ? '#3b82f6' : 'transparent',
-                  color: currentPage === 'Settings' ? 'white' : '#cbd5e1',
+                  background: currentPage === 'Settings' 
+                    ? 'linear-gradient(90deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)' 
+                    : 'transparent',
+                  color: currentPage === 'Settings' ? '#1e40af' : '#1e3a8a',
                   border: 'none',
+                  borderLeft: currentPage === 'Settings' ? '4px solid #3b82f6' : '4px solid transparent',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: (sidebarExpanded || sidebarHovered) ? 'flex-start' : 'center',
                   gap: (sidebarExpanded || sidebarHovered) ? '16px' : '0',
                   fontSize: '14px',
-                  fontWeight: '500',
+                  fontWeight: currentPage === 'Settings' ? '600' : '500',
                   transition: 'all 0.2s ease',
-                  position: 'relative'
+                  position: 'relative',
+                  borderRadius: currentPage === 'Settings' ? '0 8px 8px 0' : '0'
                 }}
               >
-                <span style={{ fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⚙️</span>
+                <span style={{ fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⚙</span>
                 {(sidebarExpanded || sidebarHovered) && <span style={{ whiteSpace: 'nowrap' }}>Settings</span>}
               </button>
               <button
@@ -343,8 +484,9 @@ export default function App() {
                   width: '100%',
                   height: '48px',
                   background: 'transparent',
-                  color: '#cbd5e1',
+                  color: '#1e3a8a',
                   border: 'none',
+                  borderLeft: '4px solid transparent',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -353,19 +495,29 @@ export default function App() {
                   fontSize: '14px',
                   fontWeight: '500',
                   transition: 'all 0.2s ease',
-                  position: 'relative'
+                  position: 'relative',
+                  borderRadius: '0'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.5)';
+                  e.currentTarget.style.borderRadius = '0 8px 8px 0';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.borderRadius = '0';
                 }}
               >
-                <span style={{ fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>❓</span>
-                {(sidebarExpanded || sidebarHovered) && <span style={{ whiteSpace: 'nowrap' }}>Unknown</span>}
+                <span style={{ fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>?</span>
+                {(sidebarExpanded || sidebarHovered) && <span style={{ whiteSpace: 'nowrap' }}>Help</span>}
               </button>
               <button
                 style={{
                   width: '100%',
                   height: '48px',
                   background: 'transparent',
-                  color: '#cbd5e1',
+                  color: '#1e3a8a',
                   border: 'none',
+                  borderLeft: '4px solid transparent',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -374,10 +526,20 @@ export default function App() {
                   fontSize: '14px',
                   fontWeight: '500',
                   transition: 'all 0.2s ease',
-                  position: 'relative'
+                  position: 'relative',
+                  borderRadius: '0'
                 }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.5)';
+                  e.currentTarget.style.borderRadius = '0 8px 8px 0';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.borderRadius = '0';
+                }}
+                onClick={() => window.location.href = '/sign-in'}
               >
-                <span style={{ fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🚪</span>
+                <span style={{ fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>↲</span>
                 {(sidebarExpanded || sidebarHovered) && <span style={{ whiteSpace: 'nowrap' }}>Logout</span>}
               </button>
             </div>
@@ -397,10 +559,10 @@ export default function App() {
         {/* Top Navbar */}
         <header style={{
           height: '64px',
-          background: 'rgba(255, 255, 255, 0.9)',
+          background: 'linear-gradient(90deg, rgba(239, 246, 255, 0.95) 0%, rgba(219, 234, 254, 0.95) 100%)',
           backdropFilter: 'blur(20px)',
           border: 'none',
-          borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+          borderBottom: '1px solid rgba(59, 130, 246, 0.15)',
           display: 'flex',
           alignItems: 'center',
           padding: '0 32px',
@@ -420,15 +582,15 @@ export default function App() {
                 cursor: 'pointer',
                 padding: '8px',
                 borderRadius: '6px',
-                color: '#64748b',
+                color: '#1e40af',
                 transition: 'all 0.2s ease'
               }}
-              onMouseEnter={(e) => e.target.style.background = 'rgba(0, 0, 0, 0.05)'}
+              onMouseEnter={(e) => e.target.style.background = 'rgba(59, 130, 246, 0.1)'}
               onMouseLeave={(e) => e.target.style.background = 'none'}
             >
               <span style={{ fontSize: '18px' }}>☰</span>
             </button>
-            <span style={{ fontSize: '20px', fontWeight: '600', color: '#1e293b' }}>
+            <span style={{ fontSize: '20px', fontWeight: '600', color: '#1e40af' }}>
               {menuItems.find(item => item.component === currentPage)?.name || 'Dashboard'}
             </span>
           </div>
@@ -440,24 +602,12 @@ export default function App() {
               borderRadius: '6px',
               cursor: 'pointer',
               fontSize: '16px',
-              color: '#64748b'
+              color: '#3b82f6'
             }}>
               🔔
             </button>
-            <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              background: '#e5e7eb',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: '600',
-              color: '#374151',
-              fontSize: '14px'
-            }}>
-              JM
-            </div>
+            <OrganizationSwitcher />
+            <UserButton />
           </div>
         </header>
 
@@ -468,15 +618,16 @@ export default function App() {
           marginTop: '64px',
           minHeight: 'calc(100vh - 64px)',
           overflowX: 'hidden',
-          overflowY: 'auto'
+          overflowY: 'auto',
+          background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 25%, #bae6fd 50%, #e0f2fe 75%, #f0f9ff 100%)'
         }}>
           <div style={{
-            background: 'rgba(255, 255, 255, 0.85)',
+            background: 'rgba(255, 255, 255, 0.9)',
             backdropFilter: 'blur(20px)',
             borderRadius: '24px',
-            border: '1px solid rgba(255, 255, 255, 0.8)',
+            border: '1px solid rgba(59, 130, 246, 0.2)',
             minHeight: 'calc(100vh - 112px)',
-            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.08)',
+            boxShadow: '0 8px 32px 0 rgba(59, 130, 246, 0.15)',
             overflow: 'hidden'
           }}>
           {currentPage === 'LeasesFiles' ? (

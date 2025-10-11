@@ -85,10 +85,12 @@ const MobilePropertiesPage = () => {
   return (
     <div style={{
       padding: getResponsivePadding(),
-      background: '#f8fafc',
+      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%)',
       minHeight: '100vh',
       maxWidth: screenSize.isLargeTablet ? '1200px' : 'none',
-      margin: screenSize.isLargeTablet ? '0 auto' : '0'
+      margin: screenSize.isLargeTablet ? '0 auto' : '0',
+      overflow: 'hidden',
+      boxSizing: 'border-box'
     }}>
       {/* Header */}
       <div style={{
@@ -96,27 +98,37 @@ const MobilePropertiesPage = () => {
         alignItems: 'center',
         justifyContent: 'space-between',
         marginBottom: '20px',
-        padding: '0 4px'
+        padding: '0 4px',
+        maxWidth: '100%',
+        overflow: 'hidden'
       }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '12px'
+          gap: '12px',
+          flex: 1,
+          minWidth: 0
         }}>
           <button style={{
             background: 'none',
             border: 'none',
             fontSize: '18px',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            color: '#1e40af',
+            padding: '8px',
+            flexShrink: 0
           }}>
             ←
           </button>
           <h1 style={{
-            fontSize: '18px',
+            fontSize: screenSize.isLargeTablet ? '20px' : '18px',
             fontWeight: '600',
-            color: '#374151',
+            color: '#1e40af',
             margin: 0,
-            letterSpacing: '0.5px'
+            letterSpacing: '0.5px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
           }}>
             PROPERTIES
           </h1>
@@ -124,24 +136,28 @@ const MobilePropertiesPage = () => {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '12px'
+          gap: '8px',
+          flexShrink: 0
         }}>
           <button style={{
             background: 'none',
             border: 'none',
             fontSize: '18px',
             cursor: 'pointer',
-            color: '#3b82f6'
+            color: '#3b82f6',
+            padding: '8px'
           }}>
-            🔍
+            ⊙
           </button>
           <button style={{
             background: 'none',
             border: 'none',
             fontSize: '18px',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            color: '#1e40af',
+            padding: '8px'
           }}>
-            ⋮
+            ☰
           </button>
         </div>
       </div>
@@ -151,47 +167,62 @@ const MobilePropertiesPage = () => {
         display: 'grid',
         gridTemplateColumns: getStatsGridColumns(),
         gap: screenSize.isLargeTablet ? '16px' : '12px',
-        marginBottom: screenSize.isLargeTablet ? '32px' : '24px'
+        marginBottom: screenSize.isLargeTablet ? '32px' : '24px',
+        width: '100%',
+        maxWidth: '100%',
+        overflow: 'hidden'
       }}>
         <div style={{
-          background: 'white',
+          background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
           borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
-          padding: screenSize.isLargeTablet ? '24px' : '16px',
+          padding: screenSize.isLargeTablet ? '20px' : '14px',
           textAlign: 'center',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 2px 4px rgba(59,130,246,0.08)',
+          border: '1px solid #bfdbfe',
+          minWidth: 0
         }}>
           <div style={{
-            fontSize: screenSize.isLargeTablet ? '14px' : '12px',
-            color: '#6b7280',
-            marginBottom: '4px'
+            fontSize: screenSize.isLargeTablet ? '13px' : '11px',
+            color: '#60a5fa',
+            marginBottom: '4px',
+            fontWeight: '500',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
           }}>
             Vacant Units
           </div>
           <div style={{
-            fontSize: screenSize.isLargeTablet ? '32px' : '24px',
+            fontSize: screenSize.isLargeTablet ? '28px' : '22px',
             fontWeight: '700',
-            color: '#10b981'
+            color: '#0284c7'
           }}>
             164
           </div>
         </div>
         
         <div style={{
-          background: 'white',
+          background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
           borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
-          padding: screenSize.isLargeTablet ? '24px' : '16px',
+          padding: screenSize.isLargeTablet ? '20px' : '14px',
           textAlign: 'center',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 2px 4px rgba(59,130,246,0.08)',
+          border: '1px solid #bfdbfe',
+          minWidth: 0
         }}>
           <div style={{
-            fontSize: screenSize.isLargeTablet ? '14px' : '12px',
-            color: '#6b7280',
-            marginBottom: '4px'
+            fontSize: screenSize.isLargeTablet ? '13px' : '11px',
+            color: '#60a5fa',
+            marginBottom: '4px',
+            fontWeight: '500',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
           }}>
-            Overdue Units
+            Overdue
           </div>
           <div style={{
-            fontSize: screenSize.isLargeTablet ? '32px' : '24px',
+            fontSize: screenSize.isLargeTablet ? '28px' : '22px',
             fontWeight: '700',
             color: '#ef4444'
           }}>
@@ -200,21 +231,27 @@ const MobilePropertiesPage = () => {
         </div>
         
         <div style={{
-          background: 'white',
+          background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
           borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
-          padding: screenSize.isLargeTablet ? '24px' : '16px',
+          padding: screenSize.isLargeTablet ? '20px' : '14px',
           textAlign: 'center',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 2px 4px rgba(59,130,246,0.08)',
+          border: '1px solid #bfdbfe',
+          minWidth: 0
         }}>
           <div style={{
-            fontSize: screenSize.isLargeTablet ? '14px' : '12px',
-            color: '#6b7280',
-            marginBottom: '4px'
+            fontSize: screenSize.isLargeTablet ? '13px' : '11px',
+            color: '#60a5fa',
+            marginBottom: '4px',
+            fontWeight: '500',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
           }}>
-            In Maintenance
+            Maintenance
           </div>
           <div style={{
-            fontSize: screenSize.isLargeTablet ? '32px' : '24px',
+            fontSize: screenSize.isLargeTablet ? '28px' : '22px',
             fontWeight: '700',
             color: '#3b82f6'
           }}>
@@ -227,52 +264,70 @@ const MobilePropertiesPage = () => {
       <div style={{
         display: 'grid',
         gridTemplateColumns: getPropertiesGridColumns(),
-        gap: screenSize.isLargeTablet ? '16px' : '12px'
+        gap: screenSize.isLargeTablet ? '16px' : '12px',
+        width: '100%',
+        maxWidth: '100%',
+        overflow: 'hidden'
       }}>
         {propertiesData.map((property, index) => (
           <div key={property.id} style={{
-            background: 'white',
+            background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
             borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
-            padding: screenSize.isLargeTablet ? '20px' : '16px',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            padding: screenSize.isLargeTablet ? '18px' : '14px',
+            boxShadow: '0 2px 4px rgba(59,130,246,0.08)',
             borderLeft: `4px solid ${property.color}`,
-            position: 'relative'
+            border: '1px solid #bfdbfe',
+            borderLeft: `4px solid ${property.color}`,
+            position: 'relative',
+            minWidth: 0,
+            overflow: 'hidden'
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: screenSize.isLargeTablet ? '16px' : '12px'
+              gap: screenSize.isLargeTablet ? '14px' : '10px',
+              width: '100%',
+              overflow: 'hidden'
             }}>
               {/* Property Icon */}
               <div style={{
-                width: screenSize.isLargeTablet ? '60px' : '48px',
-                height: screenSize.isLargeTablet ? '60px' : '48px',
-                background: '#f0f9ff',
+                width: screenSize.isLargeTablet ? '56px' : '44px',
+                height: screenSize.isLargeTablet ? '56px' : '44px',
+                background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
                 borderRadius: screenSize.isLargeTablet ? '12px' : '8px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: screenSize.isLargeTablet ? '24px' : '20px'
+                fontSize: screenSize.isLargeTablet ? '22px' : '18px',
+                flexShrink: 0,
+                border: '1px solid #93c5fd',
+                color: '#1e40af'
               }}>
-                🏢
+                ⌂
               </div>
               
               {/* Property Info */}
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
                 <h3 style={{
-                  fontSize: screenSize.isLargeTablet ? '18px' : '16px',
+                  fontSize: screenSize.isLargeTablet ? '17px' : '15px',
                   fontWeight: '600',
-                  color: '#374151',
+                  color: '#1e40af',
                   margin: 0,
-                  marginBottom: '4px'
+                  marginBottom: '4px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
                 }}>
                   {property.name}
                 </h3>
                 <p style={{
-                  fontSize: screenSize.isLargeTablet ? '16px' : '14px',
-                  color: '#6b7280',
+                  fontSize: screenSize.isLargeTablet ? '14px' : '12px',
+                  color: '#60a5fa',
                   margin: 0,
-                  marginBottom: '8px'
+                  marginBottom: '8px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
                 }}>
                   {property.address}
                 </p>
@@ -281,26 +336,26 @@ const MobilePropertiesPage = () => {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: screenSize.isLargeTablet ? '20px' : '16px'
+                  gap: screenSize.isLargeTablet ? '16px' : '12px'
                 }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
-                    fontSize: screenSize.isLargeTablet ? '16px' : '14px',
-                    color: '#6b7280'
+                    fontSize: screenSize.isLargeTablet ? '14px' : '12px',
+                    color: '#3b82f6'
                   }}>
-                    <span>👥</span>
+                    <span>◯</span>
                     <span>{property.tenants}</span>
                   </div>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
-                    fontSize: screenSize.isLargeTablet ? '16px' : '14px',
-                    color: '#6b7280'
+                    fontSize: screenSize.isLargeTablet ? '14px' : '12px',
+                    color: '#3b82f6'
                   }}>
-                    <span>🏠</span>
+                    <span>⌂</span>
                     <span>{property.units}</span>
                   </div>
                 </div>
@@ -311,16 +366,16 @@ const MobilePropertiesPage = () => {
                 <button style={{
                   position: 'absolute',
                   bottom: '-6px',
-                  right: screenSize.isLargeTablet ? '20px' : '16px',
-                  width: screenSize.isLargeTablet ? '40px' : '32px',
-                  height: screenSize.isLargeTablet ? '40px' : '32px',
+                  right: screenSize.isLargeTablet ? '18px' : '14px',
+                  width: screenSize.isLargeTablet ? '38px' : '30px',
+                  height: screenSize.isLargeTablet ? '38px' : '30px',
                   borderRadius: '50%',
-                  background: '#3b82f6',
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)',
                   border: 'none',
                   color: 'white',
-                  fontSize: screenSize.isLargeTablet ? '20px' : '18px',
+                  fontSize: screenSize.isLargeTablet ? '18px' : '16px',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)'
+                  boxShadow: '0 4px 8px rgba(59,130,246,0.3)'
                 }}>
                   +
                 </button>
@@ -335,30 +390,154 @@ const MobilePropertiesPage = () => {
 
 // Mobile Dashboard Component
 const MobileDashboardPage = () => {
+  const [screenSize, setScreenSize] = useState({
+    width: window.innerWidth,
+    isPhone: window.innerWidth <= 480,
+    isTablet: window.innerWidth > 480 && window.innerWidth <= 1024,
+    isLargeTablet: window.innerWidth > 768 && window.innerWidth <= 1024
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setScreenSize({
+        width,
+        isPhone: width <= 480,
+        isTablet: width > 480 && width <= 1024,
+        isLargeTablet: width > 768 && width <= 1024
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const stats = [
+    { label: 'Total Income', value: '$24,500', icon: '↑', color: '#0284c7' },
+    { label: 'Total Expenses', value: '$8,200', icon: '↓', color: '#ef4444' },
+    { label: 'Net Profit', value: '$16,300', icon: '📈', color: '#10b981' },
+    { label: 'Properties', value: '12', icon: '⌂', color: '#3b82f6' }
+  ];
+
   return (
     <div style={{
-      padding: '16px',
-      background: '#f8fafc',
-      minHeight: '100vh'
+      padding: screenSize.isLargeTablet ? '24px' : '16px',
+      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%)',
+      minHeight: '100vh',
+      width: '100%',
+      maxWidth: '100%',
+      boxSizing: 'border-box',
+      overflow: 'hidden'
     }}>
       <h1 style={{
-        fontSize: '24px',
+        fontSize: screenSize.isLargeTablet ? '28px' : '24px',
         fontWeight: '700',
-        color: '#374151',
-        marginBottom: '20px'
+        color: '#1e40af',
+        marginBottom: '20px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }}>
         Dashboard
       </h1>
+      
       <div style={{
-        background: 'white',
-        borderRadius: '12px',
-        padding: '20px',
-        textAlign: 'center',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        display: 'grid',
+        gridTemplateColumns: screenSize.isLargeTablet ? 'repeat(2, 1fr)' : '1fr',
+        gap: screenSize.isLargeTablet ? '16px' : '12px',
+        marginBottom: '24px'
       }}>
-        <p style={{ color: '#6b7280', margin: 0 }}>
-          Mobile dashboard content coming soon...
-        </p>
+        {stats.map((stat, index) => (
+          <div key={index} style={{
+            background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+            borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
+            padding: screenSize.isLargeTablet ? '20px' : '16px',
+            boxShadow: '0 2px 4px rgba(59,130,246,0.08)',
+            border: '1px solid #bfdbfe',
+            minWidth: 0,
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px'
+            }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontSize: screenSize.isLargeTablet ? '13px' : '12px',
+                  color: '#60a5fa',
+                  marginBottom: '8px',
+                  fontWeight: '500',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {stat.label}
+                </div>
+                <div style={{
+                  fontSize: screenSize.isLargeTablet ? '26px' : '22px',
+                  fontWeight: '700',
+                  color: stat.color,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {stat.value}
+                </div>
+              </div>
+              <div style={{
+                fontSize: screenSize.isLargeTablet ? '32px' : '28px',
+                flexShrink: 0
+              }}>
+                {stat.icon}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Recent Activity */}
+      <div style={{
+        background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+        borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
+        padding: screenSize.isLargeTablet ? '20px' : '16px',
+        boxShadow: '0 2px 4px rgba(59,130,246,0.08)',
+        border: '1px solid #bfdbfe',
+        overflow: 'hidden'
+      }}>
+        <h2 style={{
+          fontSize: screenSize.isLargeTablet ? '18px' : '16px',
+          fontWeight: '600',
+          color: '#1e40af',
+          marginBottom: '16px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }}>
+          Recent Activity
+        </h2>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px'
+        }}>
+          {['Payment received - $1,200', 'New tenant added', 'Maintenance request'].map((activity, i) => (
+            <div key={i} style={{
+              padding: screenSize.isLargeTablet ? '14px' : '12px',
+              background: '#f0f9ff',
+              borderRadius: '8px',
+              fontSize: screenSize.isLargeTablet ? '14px' : '13px',
+              color: '#1e40af',
+              border: '1px solid #e0f2fe',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}>
+              {activity}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -366,36 +545,118 @@ const MobileDashboardPage = () => {
 
 // Mobile Notifications Component
 const MobileNotificationsPage = () => {
+  const [screenSize, setScreenSize] = useState({
+    width: window.innerWidth,
+    isPhone: window.innerWidth <= 480,
+    isTablet: window.innerWidth > 480 && window.innerWidth <= 1024,
+    isLargeTablet: window.innerWidth > 768 && window.innerWidth <= 1024
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setScreenSize({
+        width,
+        isPhone: width <= 480,
+        isTablet: width > 480 && width <= 1024,
+        isLargeTablet: width > 768 && width <= 1024
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const notifications = [
+    { type: 'payment', message: 'Payment received from Unit 2A', time: '2h ago', icon: '↑', color: '#0284c7' },
+    { type: 'maintenance', message: 'Maintenance request submitted', time: '5h ago', icon: '⚒', color: '#f59e0b' },
+    { type: 'tenant', message: 'New tenant application', time: '1d ago', icon: '◯', color: '#3b82f6' },
+    { type: 'overdue', message: 'Rent overdue - Unit 5B', time: '2d ago', icon: '⚠', color: '#ef4444' },
+    { type: 'lease', message: 'Lease expiring soon', time: '3d ago', icon: '⎘', color: '#8b5cf6' }
+  ];
+
   return (
     <div style={{
-      padding: '16px',
-      background: '#f8fafc',
-      minHeight: '100vh'
+      padding: screenSize.isLargeTablet ? '24px' : '16px',
+      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%)',
+      minHeight: '100vh',
+      width: '100%',
+      maxWidth: '100%',
+      boxSizing: 'border-box',
+      overflow: 'hidden'
     }}>
       <h1 style={{
-        fontSize: '24px',
+        fontSize: screenSize.isLargeTablet ? '28px' : '24px',
         fontWeight: '700',
-        color: '#374151',
-        marginBottom: '20px'
+        color: '#1e40af',
+        marginBottom: '20px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }}>
         Notifications
       </h1>
+      
       <div style={{
-        background: 'white',
-        borderRadius: '12px',
-        padding: '20px',
-        textAlign: 'center',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        display: 'flex',
+        flexDirection: 'column',
+        gap: screenSize.isLargeTablet ? '14px' : '12px'
       }}>
-        <div style={{
-          fontSize: '48px',
-          marginBottom: '12px'
-        }}>
-          🔔
-        </div>
-        <p style={{ color: '#6b7280', margin: 0 }}>
-          No new notifications
-        </p>
+        {notifications.map((notif, index) => (
+          <div key={index} style={{
+            background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+            borderRadius: screenSize.isLargeTablet ? '14px' : '12px',
+            padding: screenSize.isLargeTablet ? '18px' : '14px',
+            boxShadow: '0 2px 4px rgba(59,130,246,0.08)',
+            border: '1px solid #bfdbfe',
+            display: 'flex',
+            alignItems: 'center',
+            gap: screenSize.isLargeTablet ? '14px' : '12px',
+            minWidth: 0,
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              width: screenSize.isLargeTablet ? '48px' : '40px',
+              height: screenSize.isLargeTablet ? '48px' : '40px',
+              background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: screenSize.isLargeTablet ? '22px' : '18px',
+              flexShrink: 0,
+              border: '1px solid #93c5fd'
+            }}>
+              {notif.icon}
+            </div>
+            <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+              <div style={{
+                fontSize: screenSize.isLargeTablet ? '15px' : '14px',
+                fontWeight: '600',
+                color: '#1e40af',
+                marginBottom: '4px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}>
+                {notif.message}
+              </div>
+              <div style={{
+                fontSize: screenSize.isLargeTablet ? '13px' : '12px',
+                color: '#60a5fa'
+              }}>
+                {notif.time}
+              </div>
+            </div>
+            <div style={{
+              width: screenSize.isLargeTablet ? '10px' : '8px',
+              height: screenSize.isLargeTablet ? '10px' : '8px',
+              background: notif.color,
+              borderRadius: '50%',
+              flexShrink: 0
+            }}></div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -439,25 +700,32 @@ const MobileMorePage = ({ onNavigate }) => {
   };
 
   const moreOptions = [
-    { key: 'tenants', label: 'Tenants', icon: '👥' },
-    { key: 'leases', label: 'Leases & Files', icon: '📄' },
-    { key: 'income', label: 'Income', icon: '💰' },
-    { key: 'expenses', label: 'Expenses', icon: '💳' },
-    { key: 'settings', label: 'Settings', icon: '⚙️' }
+    { key: 'tenants', label: 'Tenants', icon: '◯' },
+    { key: 'leases', label: 'Leases & Files', icon: '⎘' },
+    { key: 'income', label: 'Income', icon: '↑' },
+    { key: 'expenses', label: 'Expenses', icon: '↓' },
+    { key: 'settings', label: 'Settings', icon: '⚙' }
   ];
 
   return (
     <div style={{
       padding: getResponsivePadding(),
-      background: '#f8fafc',
+      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%)',
       minHeight: '100vh',
-      position: 'relative'
+      position: 'relative',
+      width: '100%',
+      maxWidth: '100%',
+      boxSizing: 'border-box',
+      overflow: 'hidden'
     }}>
       <h1 style={{
         fontSize: screenSize.isLargeTablet ? '28px' : '24px',
         fontWeight: '700',
-        color: '#374151',
-        marginBottom: screenSize.isLargeTablet ? '24px' : '20px'
+        color: '#1e40af',
+        marginBottom: screenSize.isLargeTablet ? '24px' : '20px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }}>
         More
       </h1>
@@ -472,19 +740,21 @@ const MobileMorePage = ({ onNavigate }) => {
             key={option.key}
             onClick={() => onNavigate(option.key)}
             style={{
-              background: 'white',
-              border: 'none',
+              background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+              border: '1px solid #bfdbfe',
               borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
-              padding: screenSize.isLargeTablet ? '24px' : '20px',
+              padding: screenSize.isLargeTablet ? '22px' : '18px',
               textAlign: 'center',
               cursor: 'pointer',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 2px 4px rgba(59,130,246,0.08)',
               transition: 'transform 0.2s ease',
-              minHeight: screenSize.isLargeTablet ? '120px' : '100px',
+              minHeight: screenSize.isLargeTablet ? '110px' : '95px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              minWidth: 0,
+              overflow: 'hidden'
             }}
             onMouseDown={(e) => {
               e.currentTarget.style.transform = 'scale(0.98)';
@@ -497,15 +767,19 @@ const MobileMorePage = ({ onNavigate }) => {
             }}
           >
             <div style={{
-              fontSize: screenSize.isLargeTablet ? '36px' : '32px',
-              marginBottom: screenSize.isLargeTablet ? '12px' : '8px'
+              fontSize: screenSize.isLargeTablet ? '34px' : '30px',
+              marginBottom: screenSize.isLargeTablet ? '10px' : '8px'
             }}>
               {option.icon}
             </div>
             <div style={{
-              fontSize: screenSize.isLargeTablet ? '16px' : '14px',
-              fontWeight: '500',
-              color: '#374151'
+              fontSize: screenSize.isLargeTablet ? '15px' : '13px',
+              fontWeight: '600',
+              color: '#1e40af',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              width: '100%'
             }}>
               {option.label}
             </div>
@@ -550,8 +824,8 @@ export default function AppMobile() {
   };
 
   const tabItems = [
-    { key: 'home', label: 'Home', icon: '🏠' },
-    { key: 'properties', label: 'Properties', icon: '🏢' },
+    { key: 'home', label: 'Home', icon: '▢' },
+    { key: 'properties', label: 'Properties', icon: '⌂' },
     { key: 'notifications', label: 'Notifications', icon: '🔔' },
     { key: 'more', label: 'More', icon: '☰' }
   ];
@@ -597,16 +871,20 @@ export default function AppMobile() {
     <div style={{
       width: '100%',
       height: '100vh',
-      background: '#f8fafc',
+      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%)',
       display: 'flex',
       flexDirection: 'column',
-      position: 'relative'
+      position: 'relative',
+      overflow: 'hidden'
     }}>
       {/* Main Content */}
       <div style={{
         flex: 1,
         overflow: 'auto',
-        paddingBottom: screenSize.isLargeTablet ? '104px' : screenSize.isTablet ? '96px' : '88px' // Space for bottom navigation
+        paddingBottom: screenSize.isLargeTablet ? '104px' : screenSize.isTablet ? '96px' : '88px', // Space for bottom navigation
+        WebkitOverflowScrolling: 'touch',
+        maxWidth: '100%',
+        boxSizing: 'border-box'
       }}>
         {activeTab === 'home' && <MobileDashboardPage />}
         {activeTab === 'properties' && <MobilePropertiesPage />}
@@ -625,14 +903,17 @@ export default function AppMobile() {
         bottom: 0,
         left: 0,
         right: 0,
-        background: 'white',
-        borderTop: '1px solid #e5e7eb',
+        background: 'linear-gradient(90deg, rgba(255,255,255,0.98) 0%, rgba(240,249,255,0.98) 100%)',
+        borderTop: '1px solid #bfdbfe',
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
-        padding: screenSize.isLargeTablet ? '12px 0' : screenSize.isTablet ? '10px 0' : '8px 0',
-        height: screenSize.isLargeTablet ? '88px' : screenSize.isTablet ? '80px' : '72px',
-        zIndex: 1000
+        padding: screenSize.isLargeTablet ? '10px 0' : screenSize.isTablet ? '8px 0' : '6px 0',
+        height: screenSize.isLargeTablet ? '80px' : screenSize.isTablet ? '72px' : '68px',
+        zIndex: 1000,
+        boxShadow: '0 -2px 8px rgba(59,130,246,0.1)',
+        maxWidth: '100vw',
+        overflow: 'hidden'
       }}>
         {tabItems.map((item) => (
           <button
@@ -645,37 +926,44 @@ export default function AppMobile() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: screenSize.isLargeTablet ? '6px' : '4px',
-              padding: screenSize.isLargeTablet ? '12px 16px' : screenSize.isTablet ? '10px 14px' : '8px 12px',
+              gap: screenSize.isLargeTablet ? '5px' : '3px',
+              padding: screenSize.isLargeTablet ? '10px 14px' : screenSize.isTablet ? '8px 12px' : '6px 10px',
               borderRadius: '8px',
               transition: 'all 0.2s ease',
               position: 'relative',
-              minWidth: screenSize.isLargeTablet ? '80px' : '60px'
+              minWidth: screenSize.isLargeTablet ? '70px' : '55px',
+              flex: 1,
+              maxWidth: screenSize.isLargeTablet ? '90px' : '75px'
             }}
           >
             <div style={{
-              fontSize: screenSize.isLargeTablet ? '24px' : '20px',
+              fontSize: screenSize.isLargeTablet ? '22px' : '18px',
               opacity: activeTab === item.key ? 1 : 0.6
             }}>
               {item.icon}
             </div>
             <div style={{
-              fontSize: screenSize.isLargeTablet ? '13px' : '11px',
+              fontSize: screenSize.isLargeTablet ? '12px' : '10px',
               fontWeight: activeTab === item.key ? '600' : '400',
-              color: activeTab === item.key ? '#3b82f6' : '#6b7280'
+              color: activeTab === item.key ? '#3b82f6' : '#60a5fa',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              width: '100%',
+              textAlign: 'center'
             }}>
               {item.label}
             </div>
             {item.key === 'notifications' && (
               <div style={{
                 position: 'absolute',
-                top: screenSize.isLargeTablet ? '8px' : '6px',
-                right: screenSize.isLargeTablet ? '16px' : '12px',
-                width: screenSize.isLargeTablet ? '10px' : '8px',
-                height: screenSize.isLargeTablet ? '10px' : '8px',
+                top: screenSize.isLargeTablet ? '6px' : '4px',
+                right: screenSize.isLargeTablet ? '14px' : '10px',
+                width: screenSize.isLargeTablet ? '18px' : '16px',
+                height: screenSize.isLargeTablet ? '18px' : '16px',
                 background: '#ef4444',
                 borderRadius: '50%',
-                fontSize: screenSize.isLargeTablet ? '12px' : '10px',
+                fontSize: screenSize.isLargeTablet ? '11px' : '9px',
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',

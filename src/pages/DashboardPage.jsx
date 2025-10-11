@@ -58,13 +58,11 @@ const DashboardPage = ({ onNavigate }) => {
 
 		const applicationsProcessing = tenants.filter(t => t.applicationStatus && t.applicationStatus !== 'No Applied Yet');
 
-		// Modal states
-		const [reminderModal, setReminderModal] = useState({ isOpen: false, tenant: null });
-		const [paymentModal, setPaymentModal] = useState({ isOpen: false, tenant: null });			const handleAddTenant = () => {
-				if (onNavigate) onNavigate('Tenants');
-			};
-
-		const handleRecordPayment = (tenant = null) => {
+	// Modal states
+	const [reminderModal, setReminderModal] = useState({ isOpen: false, tenant: null });
+	const [paymentModal, setPaymentModal] = useState({ isOpen: false, tenant: null });			const handleAddTenant = () => {
+			if (onNavigate) onNavigate('LeasesFiles');
+		};		const handleRecordPayment = (tenant = null) => {
 			setPaymentModal({ isOpen: true, tenant });
 		};
 
