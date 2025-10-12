@@ -23,7 +23,7 @@ export default function OnboardingPage() {
 
   // Check if user is already onboarded
   useEffect(() => {
-    if (user?.publicMetadata?.onboarded) {
+    if (user?.unsafeMetadata?.onboarded) {
       console.log('User already onboarded, redirecting to dashboard');
       navigate('/dashboard');
     }
@@ -37,9 +37,9 @@ export default function OnboardingPage() {
     try {
       console.log('Starting onboarding...', { role, organizationName });
 
-      // Update user metadata in Clerk
+      // Update user metadata in Clerk using unsafeMetadata
       await user.update({
-        publicMetadata: {
+        unsafeMetadata: {
           role: role,
           onboarded: true
         }

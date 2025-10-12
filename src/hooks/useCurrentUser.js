@@ -51,7 +51,7 @@ export function useCurrentUser() {
     
     // Database user data (with role)
     user: dbUser,
-    role: dbUser?.role || user?.publicMetadata?.role,
+    role: dbUser?.role || user?.unsafeMetadata?.role,
     organizationId: dbUser?.organization_id || organization?.id,
     
     // Loading states

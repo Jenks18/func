@@ -28,7 +28,7 @@ export default function OrganizationManagement() {
   const [success, setSuccess] = useState('');
 
   // Get current user's role from metadata
-  const userRole = user?.publicMetadata?.role || 'tenant';
+  const userRole = user?.unsafeMetadata?.role || 'tenant';
   
   // Check if user can manage organization
   const canManageOrg = hasPermission(userRole, 'canManageOrganization');
