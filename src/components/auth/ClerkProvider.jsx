@@ -60,6 +60,11 @@ export function ClerkProvider({ children }) {
     <BaseClerkProvider 
       publishableKey={clerkConfig.publishableKey}
       appearance={clerkConfig.appearance}
+      routing="path"
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      afterSignInUrl="/onboarding"
+      afterSignUpUrl="/onboarding"
     >
       {children}
     </BaseClerkProvider>

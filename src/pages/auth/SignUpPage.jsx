@@ -100,10 +100,11 @@ export default function SignUpPage() {
         </div>
         
         <SignUp 
-          afterSignUpUrl="/onboarding"
-          signInUrl="/sign-in"
           routing="path"
           path="/sign-up"
+          signInUrl="/sign-in"
+          afterSignUpUrl="/onboarding"
+          redirectUrl="/onboarding"
           unsafeMetadata={{
             phoneOptional: true
           }}

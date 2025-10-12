@@ -62,10 +62,11 @@ export default function SignInPage() {
         </div>
         
         <SignIn 
-          afterSignInUrl="/dashboard"
-          signUpUrl="/sign-up"
           routing="path"
           path="/sign-in"
+          signUpUrl="/sign-up"
+          afterSignInUrl="/onboarding"
+          redirectUrl="/onboarding"
         />
       </div>
     </div>
