@@ -45,33 +45,72 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public Routes */}
-        <Route path="/sign-in/*" element={<SignInPage />} />
-        <Route path="/sign-up/*" element={<SignUpPage />} />
+        {/* Public Routes - no SignedIn/SignedOut wrapper needed */}
+        <Route 
+          path="/sign-in/*" 
+          element={
+            <>
+              <SignedOut>
+                <SignInPage />
+              </SignedOut>
+              <SignedIn>
+                <Navigate to="/onboarding" replace />
+              </SignedIn>
+            </>
+          } 
+        />
+        <Route 
+          path="/sign-up/*" 
+          element={
+            <>
+              <SignedOut>
+                <SignUpPage />
+              </SignedOut>
+              <SignedIn>
+                <Navigate to="/onboarding" replace />
+              </SignedIn>
+            </>
+          } 
+        />
         
         {/* Protected Routes */}
         <Route
           path="/onboarding"
           element={
-            <SignedIn>
-              <OnboardingPage />
-            </SignedIn>
+            <>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+              <SignedIn>
+                <OnboardingPage />
+              </SignedIn>
+            </>
           }
         />
         <Route
           path="/create-organization"
           element={
-            <SignedIn>
-              <CreateOrganizationPage />
-            </SignedIn>
+            <>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+              <SignedIn>
+                <CreateOrganizationPage />
+              </SignedIn>
+            </>
           }
         />
         <Route
           path="/organization"
           element={
-            <SignedIn>
-              <OrganizationProfilePage />
-            </SignedIn>
+            <>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+              <SignedIn>
+                <OrganizationProfilePage />
+              </SignedIn>
+            </>
           }
         />
         
@@ -79,57 +118,92 @@ export default function App() {
         <Route
           path="/dashboard"
           element={
-            <SignedIn>
-              <MainApp />
-            </SignedIn>
+            <>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+              <SignedIn>
+                <MainApp />
+              </SignedIn>
+            </>
           }
         />
         <Route
           path="/properties"
           element={
-            <SignedIn>
-              <MainApp />
-            </SignedIn>
+            <>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+              <SignedIn>
+                <MainApp />
+              </SignedIn>
+            </>
           }
         />
         <Route
           path="/tenants"
           element={
-            <SignedIn>
-              <MainApp />
-            </SignedIn>
+            <>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+              <SignedIn>
+                <MainApp />
+              </SignedIn>
+            </>
           }
         />
         <Route
           path="/leases"
           element={
-            <SignedIn>
-              <MainApp />
-            </SignedIn>
+            <>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+              <SignedIn>
+                <MainApp />
+              </SignedIn>
+            </>
           }
         />
         <Route
           path="/income"
           element={
-            <SignedIn>
-              <MainApp />
-            </SignedIn>
+            <>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+              <SignedIn>
+                <MainApp />
+              </SignedIn>
+            </>
           }
         />
         <Route
           path="/expenses"
           element={
-            <SignedIn>
-              <MainApp />
-            </SignedIn>
+            <>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+              <SignedIn>
+                <MainApp />
+              </SignedIn>
+            </>
           }
         />
         <Route
           path="/settings"
           element={
-            <SignedIn>
-              <MainApp />
-            </SignedIn>
+            <>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+              <SignedIn>
+                <MainApp />
+              </SignedIn>
+            </>
           }
         />
         
