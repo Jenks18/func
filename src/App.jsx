@@ -7,6 +7,7 @@ import SettingsPage from './pages/SettingsPage';
 import IncomePage from './pages/IncomePage';
 import PropertiesPage from './pages/PropertiesPage';
 import TenantsPage from './pages/TenantsPage';
+import UsersPage from './pages/UsersPage';
 import ExpensesPage from './pages/ExpensesPage';
 import DatabaseTestPage from './pages/DatabaseTestPage';
 import AppMobile from './AppMobile';
@@ -155,6 +156,19 @@ export default function App() {
           }
         />
         <Route
+          path="/users"
+          element={
+            <>
+              <SignedOut>
+                <Navigate to="/sign-in" replace />
+              </SignedOut>
+              <SignedIn>
+                <MainApp />
+              </SignedIn>
+            </>
+          }
+        />
+        <Route
           path="/leases"
           element={
             <>
@@ -257,6 +271,7 @@ function MainApp() {
     if (path === '' || path === 'dashboard') return 'Dashboard';
     if (path === 'properties') return 'Properties';
     if (path === 'tenants') return 'Tenants';
+    if (path === 'users') return 'Users';
     if (path === 'leases') return 'LeasesFiles';
     if (path === 'income') return 'Income';
     if (path === 'expenses') return 'Expenses';
@@ -270,6 +285,7 @@ function MainApp() {
     { name: 'Dashboard', component: 'Dashboard', icon: '▢' },
     { name: 'Properties', component: 'Properties', icon: '⌂' },
     { name: 'Tenants', component: 'Tenants', icon: '◯' },
+    { name: 'Users', component: 'Users', icon: '👥' },
     { name: 'Applications', component: 'Applications', icon: '☰' },
     { name: 'Leases & Files', component: 'LeasesFiles', icon: '⎘' },
     { name: 'Income', component: 'Income', icon: '↑' },
@@ -353,6 +369,7 @@ function MainApp() {
       'Dashboard': '/dashboard',
       'Properties': '/properties',
       'Tenants': '/tenants',
+      'Users': '/users',
       'LeasesFiles': '/leases',
       'Income': '/income',
       'Expenses': '/expenses',
@@ -716,6 +733,8 @@ function MainApp() {
             <PropertiesPage />
           ) : currentPage === 'Tenants' ? (
             <TenantsPage />
+          ) : currentPage === 'Users' ? (
+            <UsersPage />
           ) : currentPage === 'Expenses' ? (
             <ExpensesPage />
           ) : currentPage === 'DatabaseTest' ? (
