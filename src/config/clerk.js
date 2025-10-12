@@ -85,6 +85,7 @@ export const PERMISSIONS = {
   // Settings permissions
   canManageOrganization: ['super_admin', 'org_admin'],
   canInviteUsers: ['super_admin', 'org_admin', 'manager'],
+  canManageUsers: ['super_admin', 'org_admin', 'property_owner', 'manager'],
 };
 
 export function hasPermission(userRole, permission) {

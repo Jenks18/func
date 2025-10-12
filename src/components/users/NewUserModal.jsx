@@ -4,10 +4,13 @@
  */
 
 import { useState } from 'react';
+import { useOrganization } from '@clerk/clerk-react';
 import { useAuthenticatedSupabase } from '../../hooks/useAuthenticatedSupabase';
+import { inviteUserToOrganization } from '../../services/userInvitationService';
 import { ROLES } from '../../config/clerk';
 
 export default function NewUserModal({ onClose, onSuccess }) {
+  const { organization } = useOrganization();
   const { supabase } = useAuthenticatedSupabase();
   
   const [formData, setFormData] = useState({
@@ -57,29 +60,31 @@ export default function NewUserModal({ onClose, onSuccess }) {
     setError('');
 
     try {
-      // Create user in database
-      const { data, error: insertError } = await supabase
-        .from('users')
-        .insert([{
-          email: formData.email,
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone: formData.phone,
-          role: formData.role,
-          access_levels: accessLevels,
-          status: 'active'
-        }])
-        .select()
-        .single();
+      if (!organization) {
+        throw new Error('No organization found. Please create an organization first.');
+      }
 
-      if (insertError) throw insertError;
+      // Invite user via Clerk and create database record
+      const result = await inviteUserToOrganization({
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        role: formData.role,
+        accessLevels: accessLevels,
+        organization: organization,
+        supabase: supabase
+      });
 
-      // TODO: Send invitation email via Clerk
+      console.log('User invited successfully:', result);
+      
+      // Show success message
+      alert(`✅ Invitation sent to ${formData.email}!\n\nThey will receive an email to join your organization.`);
       
       onSuccess();
     } catch (err) {
-      console.error('Error creating user:', err);
-      setError(err.message || 'Failed to create user');
+      console.error('Error inviting user:', err);
+      setError(err.message || 'Failed to invite user. Please try again.');
     } finally {
       setLoading(false);
     }
