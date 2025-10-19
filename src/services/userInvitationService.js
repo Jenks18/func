@@ -25,7 +25,7 @@ export async function inviteUserToOrganization({
   supabase 
 }) {
   try {
-    console.log('Inviting user:', { email, role, organization: organization.name });
+    // console.log('Inviting user:', { email, role, organization: organization.name });
 
     // 1. Send Clerk organization invitation
     // This sends an email to the user with a link to join
@@ -34,7 +34,7 @@ export async function inviteUserToOrganization({
       role: 'org:member', // Clerk organization role (not our app role)
     });
 
-    console.log('Clerk invitation created:', invitation.id);
+    // console.log('Clerk invitation created:', invitation.id);
 
     // 2. Create user record in Supabase database
     // This stores our app-specific role and permissions
@@ -56,7 +56,7 @@ export async function inviteUserToOrganization({
 
     if (dbError) throw dbError;
 
-    console.log('Database user record created:', user.id);
+    // console.log('Database user record created:', user.id);
 
     return {
       success: true,
@@ -78,7 +78,7 @@ export async function resendInvitation({ invitationId, organization }) {
   try {
     // Clerk doesn't have a built-in resend, so we'd need to revoke and recreate
     // Or you can implement email sending via your own service
-    console.log('Resending invitation:', invitationId);
+    // console.log('Resending invitation:', invitationId);
     
     // For now, just log
     return {
@@ -114,7 +114,7 @@ export async function acceptInvitation({
 
     if (error) throw error;
 
-    console.log('User invitation accepted:', user.id);
+    // console.log('User invitation accepted:', user.id);
     return user;
   } catch (error) {
     console.error('Error accepting invitation:', error);

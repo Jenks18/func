@@ -1,25 +1,94 @@
 import React, { useState, useEffect } from 'react';
-import dataService from '../services/dataService';
+import { useUser } from '@clerk/clerk-react';
+import { supabase } from '../services/supabaseClient';
 import NewTenantPage from './NewTenantPage';
 
 export default function TenantsPage() {
+  const { user } = useUser();
   const [selectedTenant, setSelectedTenant] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [tenantsData, setTenantsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showNewTenant, setShowNewTenant] = useState(false);
+  const [organizationId, setOrganizationId] = useState(null);
 
   // Load tenants data on component mount
   useEffect(() => {
-    loadTenants();
-  }, []);
+    if (user?.id) {
+      loadTenants();
+    }
+  }, [user?.id]);
 
   const loadTenants = async () => {
     try {
       setLoading(true);
-      const tenants = await dataService.tenants.getAllTenants();
-      setTenantsData(tenants);
+      
+      // Get organization ID
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('organization_id')
+        .eq('clerk_id', user.id)
+        .single();
+
+      if (userError) {
+        console.error('User error:', userError);
+        setError('Failed to load user data');
+        setLoading(false);
+        return;
+      }
+      
+      const orgId = userData.organization_id;
+      setOrganizationId(orgId);
+
+      // Fetch tenants with lease information
+      const { data: tenants, error: tenantsError } = await supabase
+        .from('tenants')
+        .select(`
+          *,
+          leases (
+            id,
+            rent_amount,
+            lease_start_date,
+            lease_end_date,
+            status,
+            property:properties(id, name, address),
+            unit:units(id, unit_number)
+          )
+        `)
+        .eq('organization_id', orgId)
+        .order('created_at', { ascending: false });
+
+      if (tenantsError) {
+        console.error('Tenants error:', tenantsError);
+        setError('Failed to load tenants');
+        setLoading(false);
+        return;
+      }
+
+      // Transform data to match expected format
+      const transformed = tenants.map(tenant => {
+        const activeLease = tenant.leases?.find(l => l.status === 'active');
+        
+        return {
+          id: tenant.id,
+          name: `${tenant.first_name} ${tenant.last_name}`,
+          firstName: tenant.first_name,
+          lastName: tenant.last_name,
+          email: tenant.email,
+          phone: tenant.phone,
+          status: tenant.status || 'active',
+          property: activeLease?.property?.name || 'No Active Lease',
+          unit: activeLease?.unit?.unit_number || '-',
+          rentAmount: activeLease?.rent_amount || 0,
+          leaseStart: activeLease?.lease_start_date || null,
+          leaseEnd: activeLease?.lease_end_date || null,
+          balance: 0, // TODO: Calculate from transactions
+          leases: tenant.leases || []
+        };
+      });
+
+      setTenantsData(transformed);
       setError(null);
     } catch (err) {
       console.error('Error loading tenants:', err);

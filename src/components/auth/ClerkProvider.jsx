@@ -63,8 +63,10 @@ export function ClerkProvider({ children }) {
       routing="path"
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
-      afterSignInUrl="/onboarding"
-      afterSignUpUrl="/onboarding"
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
+      signInForceRedirectUrl="/dashboard"
+      signUpForceRedirectUrl="/dashboard"
     >
       {children}
     </BaseClerkProvider>

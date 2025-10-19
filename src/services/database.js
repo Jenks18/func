@@ -24,7 +24,6 @@ class DatabaseService {
       request.onsuccess = (event) => {
         this.db = event.target.result;
         this.isInitialized = true;
-        console.log('Database initialized successfully');
         resolve(this.db);
       };
 
@@ -102,7 +101,6 @@ class DatabaseService {
       remindersStore.createIndex('createdAt', 'createdAt', { unique: false });
     }
 
-    console.log('Database schema created successfully');
   }
 
   // Generic CRUD operations
@@ -124,7 +122,6 @@ class DatabaseService {
       const request = store.add(record);
 
       request.onsuccess = () => {
-        console.log(`Added to ${storeName}:`, record);
         resolve(record);
       };
 
@@ -154,7 +151,6 @@ class DatabaseService {
       const request = store.put(updated);
 
       request.onsuccess = () => {
-        console.log(`Updated in ${storeName}:`, updated);
         resolve(updated);
       };
 
@@ -206,7 +202,6 @@ class DatabaseService {
       const request = store.delete(id);
 
       request.onsuccess = () => {
-        console.log(`Deleted from ${storeName}:`, id);
         resolve(true);
       };
 
@@ -236,12 +231,10 @@ class DatabaseService {
 
   // Seed initial data
   async seedInitialData() {
-    console.log('Seeding initial data...');
     
     // Check if data already exists
     const existingProperties = await this.getAll('properties');
     if (existingProperties.length > 0) {
-      console.log('Data already exists, skipping seed');
       return;
     }
 
@@ -286,7 +279,6 @@ class DatabaseService {
       await this.add('properties', property);
     }
 
-    console.log('Initial data seeded successfully');
   }
 }
 

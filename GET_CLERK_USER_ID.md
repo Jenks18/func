@@ -7,9 +7,28 @@ Your Clerk API keys authenticate your **app**, but we need your personal **user 
 - Create organizations owned by you
 - Set up test users correctly
 
-## Two Easy Methods
+## Three Easy Methods
 
-### METHOD 1: Use the Helper Component (Easiest)
+### METHOD 1: Clerk Dashboard (Easiest!) ⭐
+
+**1. Go to Clerk Dashboard:**
+https://dashboard.clerk.com
+
+**2. Select your app** (the one with your publishable key ending in `...ZXYk`)
+
+**3. Click "Users" in the left sidebar**
+
+**4. Find your account** (your email address)
+
+**5. Click on your user** to open user details
+
+**6. Copy the User ID** at the top (format: `user_2abc123xyz...`)
+
+**That's it!** Now skip to "After You Get the ID" section below.
+
+---
+
+### METHOD 2: Use the Helper Component
 
 **1. Add to any page (e.g., DashboardPage.jsx):**
 ```jsx
@@ -34,7 +53,7 @@ import ClerkUserIdDisplay from '../components/ClerkUserIdDisplay';
 
 ---
 
-### METHOD 2: Browser Console (Quick)
+### METHOD 3: Browser Console (Quick)
 
 **1. Sign in to your app**
 

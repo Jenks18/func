@@ -6,6 +6,7 @@ import IncomePage from './pages/IncomePage';
 import PropertiesPage from './pages/PropertiesPage';
 import TenantsPage from './pages/TenantsPage';
 import ExpensesPage from './pages/ExpensesPage';
+import { GRADIENT_BACKGROUND, GRADIENT_CARD, GRADIENT_CARD_LIGHT, GRADIENT_BUTTON, PRIMARY_COLOR, BORDER_LIGHT } from './config/theme';
 
 // Mobile Properties Component
 const MobilePropertiesPage = () => {
@@ -85,7 +86,7 @@ const MobilePropertiesPage = () => {
   return (
     <div style={{
       padding: getResponsivePadding(),
-      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%)',
+      background: GRADIENT_BACKGROUND,
       minHeight: '100vh',
       maxWidth: screenSize.isLargeTablet ? '1200px' : 'none',
       margin: screenSize.isLargeTablet ? '0 auto' : '0',
@@ -173,7 +174,7 @@ const MobilePropertiesPage = () => {
         overflow: 'hidden'
       }}>
         <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+          background: 'GRADIENT_CARD',
           borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
           padding: screenSize.isLargeTablet ? '20px' : '14px',
           textAlign: 'center',
@@ -202,7 +203,7 @@ const MobilePropertiesPage = () => {
         </div>
         
         <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+          background: 'GRADIENT_CARD',
           borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
           padding: screenSize.isLargeTablet ? '20px' : '14px',
           textAlign: 'center',
@@ -231,7 +232,7 @@ const MobilePropertiesPage = () => {
         </div>
         
         <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+          background: 'GRADIENT_CARD',
           borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
           padding: screenSize.isLargeTablet ? '20px' : '14px',
           textAlign: 'center',
@@ -271,11 +272,10 @@ const MobilePropertiesPage = () => {
       }}>
         {propertiesData.map((property, index) => (
           <div key={property.id} style={{
-            background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+            background: 'GRADIENT_CARD',
             borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
             padding: screenSize.isLargeTablet ? '18px' : '14px',
             boxShadow: '0 2px 4px rgba(59,130,246,0.08)',
-            borderLeft: `4px solid ${property.color}`,
             border: '1px solid #bfdbfe',
             borderLeft: `4px solid ${property.color}`,
             position: 'relative',
@@ -293,7 +293,7 @@ const MobilePropertiesPage = () => {
               <div style={{
                 width: screenSize.isLargeTablet ? '56px' : '44px',
                 height: screenSize.isLargeTablet ? '56px' : '44px',
-                background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+                background: 'GRADIENT_CARD_LIGHT',
                 borderRadius: screenSize.isLargeTablet ? '12px' : '8px',
                 display: 'flex',
                 alignItems: 'center',
@@ -370,7 +370,7 @@ const MobilePropertiesPage = () => {
                   width: screenSize.isLargeTablet ? '38px' : '30px',
                   height: screenSize.isLargeTablet ? '38px' : '30px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)',
+                  background: 'GRADIENT_BUTTON',
                   border: 'none',
                   color: 'white',
                   fontSize: screenSize.isLargeTablet ? '18px' : '16px',
@@ -422,7 +422,7 @@ const MobileDashboardPage = () => {
   return (
     <div style={{
       padding: screenSize.isLargeTablet ? '24px' : '16px',
-      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%)',
+      background: GRADIENT_BACKGROUND,
       minHeight: '100vh',
       width: '100%',
       maxWidth: '100%',
@@ -449,7 +449,7 @@ const MobileDashboardPage = () => {
       }}>
         {stats.map((stat, index) => (
           <div key={index} style={{
-            background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+            background: 'GRADIENT_CARD',
             borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
             padding: screenSize.isLargeTablet ? '20px' : '16px',
             boxShadow: '0 2px 4px rgba(59,130,246,0.08)',
@@ -499,7 +499,7 @@ const MobileDashboardPage = () => {
 
       {/* Recent Activity */}
       <div style={{
-        background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+        background: 'GRADIENT_CARD',
         borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
         padding: screenSize.isLargeTablet ? '20px' : '16px',
         boxShadow: '0 2px 4px rgba(59,130,246,0.08)',
@@ -578,7 +578,7 @@ const MobileNotificationsPage = () => {
   return (
     <div style={{
       padding: screenSize.isLargeTablet ? '24px' : '16px',
-      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%)',
+      background: GRADIENT_BACKGROUND,
       minHeight: '100vh',
       width: '100%',
       maxWidth: '100%',
@@ -604,7 +604,7 @@ const MobileNotificationsPage = () => {
       }}>
         {notifications.map((notif, index) => (
           <div key={index} style={{
-            background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+            background: 'GRADIENT_CARD',
             borderRadius: screenSize.isLargeTablet ? '14px' : '12px',
             padding: screenSize.isLargeTablet ? '18px' : '14px',
             boxShadow: '0 2px 4px rgba(59,130,246,0.08)',
@@ -618,7 +618,7 @@ const MobileNotificationsPage = () => {
             <div style={{
               width: screenSize.isLargeTablet ? '48px' : '40px',
               height: screenSize.isLargeTablet ? '48px' : '40px',
-              background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+              background: 'GRADIENT_CARD_LIGHT',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
@@ -710,7 +710,7 @@ const MobileMorePage = ({ onNavigate }) => {
   return (
     <div style={{
       padding: getResponsivePadding(),
-      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%)',
+      background: GRADIENT_BACKGROUND,
       minHeight: '100vh',
       position: 'relative',
       width: '100%',
@@ -740,7 +740,7 @@ const MobileMorePage = ({ onNavigate }) => {
             key={option.key}
             onClick={() => onNavigate(option.key)}
             style={{
-              background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
+              background: 'GRADIENT_CARD',
               border: '1px solid #bfdbfe',
               borderRadius: screenSize.isLargeTablet ? '16px' : '12px',
               padding: screenSize.isLargeTablet ? '22px' : '18px',
@@ -871,7 +871,7 @@ export default function AppMobile() {
     <div style={{
       width: '100%',
       height: '100vh',
-      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%)',
+      background: GRADIENT_BACKGROUND,
       display: 'flex',
       flexDirection: 'column',
       position: 'relative',

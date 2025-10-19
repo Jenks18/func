@@ -8,15 +8,24 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Create base Supabase client
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Singleton instance cache to prevent multiple GoTrueClient warnings
+let authenticatedClientInstance = null;
+let currentGetToken = null;
 
 /**
- * Create Supabase client with Clerk JWT token
+ * Create or return cached Supabase client with Clerk JWT token
  * This ensures RLS policies work correctly with Clerk authentication
+ * Uses singleton pattern to avoid "Multiple GoTrueClient instances" warning
  */
 export function createAuthenticatedSupabaseClient(getToken) {
-  return createClient(supabaseUrl, supabaseAnonKey, {
+  // Return cached instance if getToken hasn't changed
+  if (authenticatedClientInstance && currentGetToken === getToken) {
+    return authenticatedClientInstance;
+  }
+
+  // Create new instance only when necessary
+  currentGetToken = getToken;
+  authenticatedClientInstance = createClient(supabaseUrl, supabaseAnonKey, {
     global: {
       headers: async () => {
         const token = await getToken({ template: 'supabase' });
@@ -24,6 +33,8 @@ export function createAuthenticatedSupabaseClient(getToken) {
       }
     }
   });
+
+  return authenticatedClientInstance;
 }
 
 /**

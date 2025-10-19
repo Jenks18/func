@@ -28,7 +28,6 @@ class DataService {
       await this.seedSampleData();
       
       this.isInitialized = true;
-      console.log('DataService initialized successfully');
     } catch (error) {
       console.error('Error initializing DataService:', error);
       throw error;
@@ -40,14 +39,12 @@ class DataService {
       // Check if we already have tenants
       const existingTenants = await this.tenants.getAllTenants();
       if (existingTenants.length > 0) {
-        console.log('Sample data already exists');
         return;
       }
 
       // Get properties to associate with tenants
       const properties = await this.properties.getAllProperties();
       if (properties.length === 0) {
-        console.log('No properties found, cannot create sample tenants');
         return;
       }
 
@@ -177,7 +174,6 @@ class DataService {
         }
       }
 
-      console.log('Sample data seeded successfully');
     } catch (error) {
       console.error('Error seeding sample data:', error);
     }
@@ -242,7 +238,6 @@ class DataService {
         }
       }
       
-      console.log('All data cleared successfully');
     } catch (error) {
       console.error('Error clearing data:', error);
       throw error;

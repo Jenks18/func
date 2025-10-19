@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
+import { supabase } from '../services/supabaseClient';
 import { UIIcons } from '../config/icons';
 import MaintenanceDetailView from '../components/maintenance/MaintenanceDetailView';
 
 const MaintenancePage = () => {
+  const { user } = useUser();
+  
   // Mobile detection
   const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
   
@@ -16,9 +20,77 @@ const MaintenancePage = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState('asc');
+  const [loading, setLoading] = useState(true);
+  const [maintenanceRequests, setMaintenanceRequests] = useState([]);
+  const [organizationId, setOrganizationId] = useState(null);
 
-  // Empty array for clean multi-tenant install - data will come from Supabase when connected
-  const maintenanceRequests = [];
+  // Fetch maintenance requests from database
+  useEffect(() => {
+    async function fetchMaintenanceData() {
+      if (!user?.id) return;
+      
+      try {
+        // Get organization ID
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('organization_id')
+          .eq('clerk_id', user.id)
+          .single();
+
+        if (userError) {
+          console.error('User error:', userError);
+          setLoading(false);
+          return;
+        }
+        
+        const orgId = userData.organization_id;
+        setOrganizationId(orgId);
+
+        // Fetch maintenance requests
+        const { data: requests, error: requestsError } = await supabase
+          .from('maintenance_requests')
+          .select(`
+            *,
+            property:properties(id, name, address),
+            unit:units(id, unit_number),
+            tenant:tenants(id, first_name, last_name, email)
+          `)
+          .eq('organization_id', orgId)
+          .order('created_at', { ascending: false });
+
+        if (requestsError) {
+          console.error('Maintenance requests error:', requestsError);
+          setLoading(false);
+          return;
+        }
+
+        // Transform data to match expected format
+        const transformed = requests.map(req => ({
+          id: req.id,
+          property: req.property?.name || 'Unknown Property',
+          unit: req.unit?.unit_number || 'N/A',
+          type: req.category || 'General',
+          description: req.title || req.description || 'No description',
+          tenant: req.tenant ? `${req.tenant.first_name} ${req.tenant.last_name}` : 'Unknown',
+          requestedOn: new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          dueOn: req.due_date ? new Date(req.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-',
+          status: req.status || 'open',
+          priority: req.priority || 'medium',
+          assignedTo: req.assigned_to || 'Unassigned',
+          fullData: req // Keep full data for detail view
+        }));
+
+        setMaintenanceRequests(transformed);
+        
+      } catch (error) {
+        console.error('Error fetching maintenance data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchMaintenanceData();
+  }, [user?.id]);
 
   // Sorting function
   const handleSort = (field) => {
@@ -406,7 +478,21 @@ const MaintenancePage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedRequests.length === 0 ? (
+                  {loading ? (
+                    <tr>
+                      <td colSpan="7" style={{
+                        padding: '60px 40px',
+                        textAlign: 'center',
+                        color: '#14b8a6',
+                        fontSize: '14px'
+                      }}>
+                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
+                        <div style={{ fontWeight: '600', marginBottom: '8px', color: '#0f766e' }}>
+                          Loading maintenance requests...
+                        </div>
+                      </td>
+                    </tr>
+                  ) : sortedRequests.length === 0 ? (
                     <tr>
                       <td colSpan="7" style={{
                         padding: '60px 40px',

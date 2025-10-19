@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
+import { supabase } from '../services/supabaseClient';
 import InvoiceDetailView from '../components/income/InvoiceDetailView';
 
 export default function IncomePageNew() {
+  const { user } = useUser();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [groupBy, setGroupBy] = useState('Property');
   const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -10,6 +13,9 @@ export default function IncomePageNew() {
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [activeStatusFilter, setActiveStatusFilter] = useState('all');
   const [expandedProperties, setExpandedProperties] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [incomeData, setIncomeData] = useState({});
+  const [organizationId, setOrganizationId] = useState(null);
 
   // Load navigation params from sessionStorage (from Dashboard clicks)
   useEffect(() => {
@@ -81,14 +87,154 @@ export default function IncomePageNew() {
   //   fetchInvoices();
   // }, []);
 
+  // Get organization ID and fetch data
+  useEffect(() => {
+    async function setupAndFetch() {
+      if (!user?.id) return;
+      
+      try {
+        // Get organization ID
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('organization_id')
+          .eq('clerk_id', user.id)
+          .single();
+
+        if (userError) {
+          console.error('User error:', userError);
+          setLoading(false);
+          return;
+        }
+        
+        const orgId = userData.organization_id;
+        setOrganizationId(orgId);
+
+        // Fetch transactions and related data
+        await fetchIncomeData(orgId);
+        
+      } catch (error) {
+        console.error('Setup error:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    setupAndFetch();
+  }, [user?.id]);
+
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Empty income data for clean multi-tenant install
-  const incomeData = {};
+  // Fetch income data from database
+  const fetchIncomeData = async (orgId) => {
+    try {
+      // Fetch all active leases with related data
+      const { data: leases, error: leasesError } = await supabase
+        .from('leases')
+        .select(`
+          id,
+          rent_amount,
+          payment_due_day,
+          lease_start_date,
+          lease_end_date,
+          status,
+          property:properties(id, name, address),
+          unit:units(id, unit_number),
+          tenant:tenants(id, first_name, last_name, email)
+        `)
+        .eq('organization_id', orgId)
+        .eq('status', 'active');
+
+      if (leasesError) {
+        console.error('Leases error:', leasesError);
+        return;
+      }
+
+      // Fetch all transactions
+      const { data: transactions, error: transError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('organization_id', orgId)
+        .eq('type', 'income')
+        .order('date', { ascending: false });
+
+      if (transError) {
+        console.error('Transactions error:', transError);
+      }
+
+      // Group by property and create invoice structure
+      const grouped = {};
+      
+      leases?.forEach(lease => {
+        const propertyName = lease.property?.name || 'Unknown Property';
+        
+        if (!grouped[propertyName]) {
+          grouped[propertyName] = {
+            invoices: [],
+            details: `(${new Date(lease.lease_start_date).toLocaleDateString()} - ${new Date(lease.lease_end_date).toLocaleDateString()})`
+          };
+        }
+
+        // Calculate payments for this lease
+        const leasePayments = transactions?.filter(t => t.lease_id === lease.id) || [];
+        const totalPaid = leasePayments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+        const rentAmount = parseFloat(lease.rent_amount || 0);
+        const balance = rentAmount - totalPaid;
+
+        // Determine status
+        let status = 'Pending';
+        const today = new Date();
+        const dueDate = new Date(today.getFullYear(), today.getMonth(), lease.payment_due_day || 1);
+        
+        if (totalPaid >= rentAmount) {
+          status = 'Fully Paid';
+        } else if (totalPaid > 0) {
+          status = 'Partial';
+        } else if (today > dueDate) {
+          status = 'Overdue';
+        }
+
+        // Create invoice object
+        const invoice = {
+          id: lease.id,
+          tenant: `${lease.tenant?.first_name || ''} ${lease.tenant?.last_name || ''}`.trim() || 'Unknown Tenant',
+          tenantEmail: lease.tenant?.email || '',
+          sharedBy: 1,
+          dueOn: dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          paidOn: leasePayments.length > 0 ? new Date(leasePayments[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-',
+          invoiceId: lease.id.substring(0, 8),
+          status,
+          unit: lease.unit?.unit_number || 'N/A',
+          amount: rentAmount,
+          processing: 0,
+          paid: totalPaid,
+          balance,
+          remindersSent: 0,
+          invoiceItems: [
+            {
+              name: 'Monthly Rent',
+              amount: rentAmount
+            }
+          ],
+          paymentsSubmitted: leasePayments.map(p => ({
+            name: `Payment by ${lease.tenant?.first_name || 'Tenant'}`,
+            amount: parseFloat(p.amount || 0),
+            bankAccount: p.payment_method || 'Unknown Method'
+          }))
+        };
+
+        grouped[propertyName].invoices.push(invoice);
+      });
+
+      setIncomeData(grouped);
+      
+    } catch (error) {
+      console.error('Error fetching income data:', error);
+    }
+  };
 
   const toggleProperty = (property) => {
     setExpandedProperties(prev => ({ ...prev, [property]: !prev[property] }));
@@ -145,25 +291,49 @@ export default function IncomePageNew() {
     let partiallyPaid = 0;
     let fullyPaid = 0;
     let totalPaidAmount = 0;
+    let overdueUnpaid = 0; // Red - unpaid overdue balance
+    let overduePaid = 0; // Green - paid portion of overdue invoices
+    let overdueProcessing = 0; // Yellow - processing portion
 
     Object.values(incomeData).forEach(({ invoices }) => {
       invoices.forEach(inv => {
         totalInvoiceAmount += inv.amount;
         totalPaidAmount += inv.paid;
+        
         if (inv.status === 'Overdue') {
           totalOpenInvoice += inv.balance;
           totalDueAmount += inv.balance;
+          // Break down overdue into paid vs unpaid
+          overdueUnpaid += inv.balance; // Red - what's still owed
+          overduePaid += inv.paid; // Green - what's been paid
+          if (inv.processing && inv.processing > 0) {
+            overdueProcessing += inv.processing; // Yellow - what's processing
+          }
         }
-        if (inv.status === 'Fully Paid') {
-          fullyPaid += inv.paid;
+        else if (inv.status === 'Fully Paid') {
+          fullyPaid += inv.paid; // Green - fully paid invoices
         }
-        if (inv.status === 'Partially Paid') {
-          partiallyPaid += inv.paid;
+        else if (inv.status === 'Partial') {
+          partiallyPaid += inv.paid; // Partially paid
+          if (inv.processing && inv.processing > 0) {
+            processing += inv.processing; // Any processing amounts
+          }
         }
       });
     });
 
-    return { totalInvoiceAmount, totalOpenInvoice, totalDueAmount, processing, partiallyPaid, fullyPaid, totalPaidAmount };
+    return { 
+      totalInvoiceAmount, 
+      totalOpenInvoice, 
+      totalDueAmount, 
+      processing, 
+      partiallyPaid, 
+      fullyPaid, 
+      totalPaidAmount,
+      overdueUnpaid, // Red segment
+      overduePaid, // Green segment
+      overdueProcessing // Yellow segment
+    };
   };
 
   const totals = calculateTotals();
@@ -476,7 +646,19 @@ export default function IncomePageNew() {
             maxHeight: '600px',
             overflowY: 'auto'
           }}>
-            {Object.entries(incomeData).length === 0 ? (
+            {loading ? (
+              <div style={{
+                padding: '80px 40px',
+                textAlign: 'center',
+                color: '#14b8a6',
+                fontSize: '14px'
+              }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
+                <div style={{ fontWeight: '600', marginBottom: '8px', color: '#0f766e', fontSize: '18px' }}>
+                  Loading income data...
+                </div>
+              </div>
+            ) : Object.entries(incomeData).length === 0 ? (
               <div style={{
                 padding: '80px 40px',
                 textAlign: 'center',
@@ -919,25 +1101,47 @@ export default function IncomePageNew() {
                   cy="100"
                   r="75"
                   fill="none"
-                  stroke="#f0f9ff"
+                  stroke="#fee2e2"
                   strokeWidth="16"
                 />
-                {/* Fully Paid (Green) - starts at top */}
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="75"
-                  fill="none"
-                  stroke="url(#greenGradient)"
-                  strokeWidth="16"
-                  strokeDasharray={`${(totals.fullyPaid / totals.totalInvoiceAmount) * 471.2} 471.2`}
-                  strokeLinecap="round"
-                  style={{
-                    filter: 'drop-shadow(0 2px 8px rgba(16,185,129,0.3))'
-                  }}
-                />
-                {/* Overdue (Red) */}
-                {totals.totalOpenInvoice > 0 && (
+                
+                {/* Collected/Paid (Green) - starts at top */}
+                {(totals.fullyPaid + totals.overduePaid + totals.partiallyPaid) > 0 && (
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="75"
+                    fill="none"
+                    stroke="url(#greenGradient)"
+                    strokeWidth="16"
+                    strokeDasharray={`${((totals.fullyPaid + totals.overduePaid + totals.partiallyPaid) / totals.totalInvoiceAmount) * 471.2} 471.2`}
+                    strokeLinecap="round"
+                    style={{
+                      filter: 'drop-shadow(0 2px 8px rgba(16,185,129,0.3))'
+                    }}
+                  />
+                )}
+                
+                {/* Processing (Yellow) - continues after green */}
+                {(totals.processing + totals.overdueProcessing) > 0 && (
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="75"
+                    fill="none"
+                    stroke="url(#yellowGradient)"
+                    strokeWidth="16"
+                    strokeDasharray={`${((totals.processing + totals.overdueProcessing) / totals.totalInvoiceAmount) * 471.2} 471.2`}
+                    strokeDashoffset={`-${((totals.fullyPaid + totals.overduePaid + totals.partiallyPaid) / totals.totalInvoiceAmount) * 471.2}`}
+                    strokeLinecap="round"
+                    style={{
+                      filter: 'drop-shadow(0 2px 8px rgba(245,158,11,0.3))'
+                    }}
+                  />
+                )}
+                
+                {/* Unpaid/Overdue Balance (Red) - continues after yellow */}
+                {totals.overdueUnpaid > 0 && (
                   <circle
                     cx="100"
                     cy="100"
@@ -945,19 +1149,24 @@ export default function IncomePageNew() {
                     fill="none"
                     stroke="url(#redGradient)"
                     strokeWidth="16"
-                    strokeDasharray={`${(totals.totalOpenInvoice / totals.totalInvoiceAmount) * 471.2} 471.2`}
-                    strokeDashoffset={`-${(totals.fullyPaid / totals.totalInvoiceAmount) * 471.2}`}
+                    strokeDasharray={`${(totals.overdueUnpaid / totals.totalInvoiceAmount) * 471.2} 471.2`}
+                    strokeDashoffset={`-${((totals.fullyPaid + totals.overduePaid + totals.partiallyPaid + totals.processing + totals.overdueProcessing) / totals.totalInvoiceAmount) * 471.2}`}
                     strokeLinecap="round"
                     style={{
                       filter: 'drop-shadow(0 2px 8px rgba(239,68,68,0.3))'
                     }}
                   />
                 )}
+                
                 {/* Gradients */}
                 <defs>
                   <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#10b981" />
                     <stop offset="100%" stopColor="#059669" />
+                  </linearGradient>
+                  <linearGradient id="yellowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#fbbf24" />
+                    <stop offset="100%" stopColor="#f59e0b" />
                   </linearGradient>
                   <linearGradient id="redGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#ef4444" />
@@ -993,49 +1202,105 @@ export default function IncomePageNew() {
             {/* Legend */}
             <div style={{
               display: 'flex',
-              justifyContent: 'center',
-              gap: '20px',
+              flexDirection: 'column',
+              gap: '8px',
               marginBottom: '20px'
             }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  boxShadow: '0 2px 6px rgba(16,185,129,0.3)'
-                }} />
-                <span style={{
-                  fontSize: '11px',
-                  fontWeight: '600',
-                  color: '#059669'
-                }}>
-                  Fully Paid
-                </span>
-              </div>
-              {totals.totalOpenInvoice > 0 && (
+              {(totals.fullyPaid + totals.overduePaid + totals.partiallyPaid) > 0 && (
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px'
+                  justifyContent: 'space-between',
+                  gap: '8px'
                 }}>
-                  <div style={{
-                    width: '12px',
-                    height: '12px',
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                    boxShadow: '0 2px 6px rgba(239,68,68,0.3)'
-                  }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      boxShadow: '0 2px 6px rgba(16,185,129,0.3)'
+                    }} />
+                    <span style={{
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      color: '#059669'
+                    }}>
+                      Collected
+                    </span>
+                  </div>
                   <span style={{
                     fontSize: '11px',
-                    fontWeight: '600',
+                    fontWeight: '700',
+                    color: '#059669'
+                  }}>
+                    {formatCurrency(totals.fullyPaid + totals.overduePaid + totals.partiallyPaid)}
+                  </span>
+                </div>
+              )}
+              
+              {(totals.processing + totals.overdueProcessing) > 0 && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                      boxShadow: '0 2px 6px rgba(251,191,36,0.3)'
+                    }} />
+                    <span style={{
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      color: '#f59e0b'
+                    }}>
+                      Processing
+                    </span>
+                  </div>
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    color: '#f59e0b'
+                  }}>
+                    {formatCurrency(totals.processing + totals.overdueProcessing)}
+                  </span>
+                </div>
+              )}
+              
+              {totals.overdueUnpaid > 0 && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                      boxShadow: '0 2px 6px rgba(239,68,68,0.3)'
+                    }} />
+                    <span style={{
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      color: '#dc2626'
+                    }}>
+                      Overdue Balance
+                    </span>
+                  </div>
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: '700',
                     color: '#dc2626'
                   }}>
-                    Overdue
+                    {formatCurrency(totals.overdueUnpaid)}
                   </span>
                 </div>
               )}

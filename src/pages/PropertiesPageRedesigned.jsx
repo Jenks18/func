@@ -23,6 +23,23 @@ export default function PropertiesPageRedesigned() {
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState('asc');
 
+  // Load navigation params from sessionStorage (from Dashboard clicks)
+  useEffect(() => {
+    const paramsStr = sessionStorage.getItem('Properties_params');
+    if (paramsStr) {
+      try {
+        const params = JSON.parse(paramsStr);
+        if (params.filterStatus) {
+          setFilterStatus(params.filterStatus);
+        }
+        // Clear params after reading
+        sessionStorage.removeItem('Properties_params');
+      } catch (error) {
+        console.error('Failed to parse navigation params:', error);
+      }
+    }
+  }, []);
+
   // Fetch properties from Supabase
   useEffect(() => {
     const fetchProperties = async () => {
